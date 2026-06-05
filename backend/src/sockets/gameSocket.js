@@ -1,6 +1,8 @@
 export default function registerGameSocket(ioNamespace, gameService) {
+  const socketSessions = new Map();
+
   ioNamespace.on('connection', (socket) => {
-    socket.on('join', async ({ code }) => {
+    socket.on('join', async ({ code, playerId }) => {
       try {
         if (!code || typeof code !== 'string') {
           return;
@@ -8,36 +10,35 @@ export default function registerGameSocket(ioNamespace, gameService) {
 
         const sessionCode = code.trim().toUpperCase();
         socket.join(sessionCode);
-        socket.emit('state:update', await gameService.getState(sessionCode));
+
+        if (playerId) {
+          await gameService.markPlayerConnected(sessionCode, Number.parseInt(playerId, 10));
+          socketSessions.set(socket.id, {
+            code: sessionCode,
+            playerId: Number.parseInt(playerId, 10),
+          });
+        }
+
+        socket.emit('state:refresh', { code: sessionCode });
       } catch (error) {
         socket.emit('game:error', { message: error.message });
       }
     });
 
-    socket.on('music:add', async ({ code }) => {
-      try {
-        if (!code || typeof code !== 'string') {
-          return;
-        }
+    socket.on('leave', async () => {
+      const current = socketSessions.get(socket.id);
+      if (!current) return;
 
-        const sessionCode = code.trim().toUpperCase();
-        ioNamespace.to(sessionCode).emit('state:update', await gameService.getState(sessionCode));
-      } catch (error) {
-        socket.emit('game:error', { message: error.message });
-      }
+      socketSessions.delete(socket.id);
+      await gameService.markPlayerDisconnected(current.code, current.playerId);
     });
 
-    socket.on('vote:submit', async ({ code }) => {
-      try {
-        if (!code || typeof code !== 'string') {
-          return;
-        }
+    socket.on('disconnect', async () => {
+      const current = socketSessions.get(socket.id);
+      if (!current) return;
 
-        const sessionCode = code.trim().toUpperCase();
-        ioNamespace.to(sessionCode).emit('state:update', await gameService.getState(sessionCode));
-      } catch (error) {
-        socket.emit('game:error', { message: error.message });
-      }
+      socketSessions.delete(socket.id);
+      await gameService.markPlayerDisconnected(current.code, current.playerId);
     });
   });
 }

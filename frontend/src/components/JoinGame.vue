@@ -1,7 +1,7 @@
 <template>
-  <form class="flex gap-2" @submit.prevent="submit">
-    <input v-model="code" required maxlength="6" class="rounded px-3 py-2 uppercase" placeholder="Code" />
-    <input v-model="name" required class="rounded px-3 py-2" placeholder="Pseudo" />
+  <form class="flex flex-wrap gap-2" @submit.prevent="submit">
+    <input v-model="code" required maxlength="6" class="rounded px-3 py-2 uppercase text-slate-900" placeholder="Code" />
+    <input v-model="name" required class="rounded px-3 py-2 text-slate-900" placeholder="Pseudo" />
     <button class="rounded bg-indigo-500 px-4 py-2 font-semibold text-white">Rejoindre</button>
   </form>
 </template>

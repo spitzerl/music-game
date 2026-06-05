@@ -5,14 +5,30 @@ const api = axios.create({
 });
 
 export default {
-  createSession(hostName) {
-    return api.post('/sessions', { hostName });
+  createSession(hostName, clientId, config) {
+    return api.post('/sessions', { hostName, clientId, config });
   },
-  joinSession(code, playerName) {
-    return api.post(`/sessions/${code}/join`, { playerName });
+  joinSession(code, playerName, clientId) {
+    return api.post(`/sessions/${code}/join`, { playerName, clientId });
   },
-  getSession(code) {
-    return api.get(`/sessions/${code}`);
+  getSession(code, playerId) {
+    return api.get(`/sessions/${code}`, {
+      params: {
+        playerId,
+      },
+    });
+  },
+  updateConfig(code, hostPlayerId, config) {
+    return api.patch(`/sessions/${code}/config`, { hostPlayerId, config });
+  },
+  addBot(code, hostPlayerId, name) {
+    return api.post(`/sessions/${code}/bots`, { hostPlayerId, name });
+  },
+  startSelection(code, hostPlayerId) {
+    return api.post(`/sessions/${code}/start-selection`, { hostPlayerId });
+  },
+  startVoting(code, hostPlayerId) {
+    return api.post(`/sessions/${code}/start-voting`, { hostPlayerId });
   },
   addMusic(code, payload) {
     if (payload.audio instanceof File) {
@@ -22,6 +38,11 @@ export default {
     }
     return api.post(`/sessions/${code}/musics`, payload);
   },
+  removeMusic(code, musicId, playerId) {
+    return api.delete(`/sessions/${code}/musics/${musicId}`, {
+      data: { playerId },
+    });
+  },
   searchDeezer(query) {
     return api.get('/deezer/search', {
       params: {
@@ -29,16 +50,13 @@ export default {
       },
     });
   },
-  startVoting(code) {
-    return api.post(`/sessions/${code}/start-voting`);
-  },
   submitVote(code, payload) {
     return api.post(`/sessions/${code}/votes`, payload);
   },
+  relaunchSession(code, hostPlayerId) {
+    return api.post(`/sessions/${code}/relaunch`, { hostPlayerId });
+  },
   getResults(code) {
     return api.get(`/sessions/${code}/results`);
-  },
-  finishSession(code) {
-    return api.post(`/sessions/${code}/finish`);
   },
 };
