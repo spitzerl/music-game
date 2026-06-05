@@ -3,10 +3,48 @@
     <h2 class="mb-4 text-2xl font-bold">Phase de sélection</h2>
 
     <form class="grid gap-3" @submit.prevent="submit">
-      <input v-model="title" required class="rounded px-3 py-2" placeholder="Titre" />
-      <input v-model="artist" required class="rounded px-3 py-2" placeholder="Artiste" />
-      <input required type="file" accept="audio/*" @change="onFileChange" />
-      <button class="rounded bg-cyan-500 px-4 py-2 font-semibold text-white">Envoyer musique</button>
+      <div class="flex gap-2">
+        <input
+          v-model="searchQuery"
+          class="w-full rounded px-3 py-2"
+          placeholder="Rechercher un morceau sur Deezer"
+          @keyup.enter.prevent="searchTracks"
+        />
+        <button
+          type="button"
+          class="rounded bg-slate-700 px-4 py-2 font-semibold text-white"
+          :disabled="isSearching"
+          @click="searchTracks"
+        >
+          {{ isSearching ? 'Recherche...' : 'Rechercher' }}
+        </button>
+      </div>
+
+      <p v-if="searchError" class="text-sm text-red-400">{{ searchError }}</p>
+
+      <ul v-if="tracks.length" class="max-h-64 space-y-2 overflow-auto rounded border border-slate-700 p-3">
+        <li
+          v-for="track in tracks"
+          :key="track.id"
+          class="flex items-center justify-between gap-3 rounded bg-slate-900 p-2"
+        >
+          <div class="min-w-0">
+            <p class="truncate font-semibold">{{ track.title }}</p>
+            <p class="truncate text-sm text-slate-300">{{ track.artist }}</p>
+          </div>
+          <button type="button" class="rounded bg-cyan-500 px-3 py-1 text-sm font-semibold text-white" @click="selectedTrack = track">
+            Choisir
+          </button>
+        </li>
+      </ul>
+
+      <p v-if="selectedTrack" class="text-sm text-emerald-400">
+        Morceau choisi: {{ selectedTrack.title }} — {{ selectedTrack.artist }}
+      </p>
+
+      <button class="rounded bg-cyan-500 px-4 py-2 font-semibold text-white" :disabled="!selectedTrack">
+        Envoyer musique
+      </button>
     </form>
 
     <ul class="mt-6 list-disc pl-6">
@@ -24,29 +62,50 @@ import { useGameStore } from '../stores/gameStore';
 const route = useRoute();
 const store = useGameStore();
 
-const title = ref('');
-const artist = ref('');
-const audio = ref(null);
+const searchQuery = ref('');
+const tracks = ref([]);
+const selectedTrack = ref(null);
+const isSearching = ref(false);
+const searchError = ref('');
 
-const onFileChange = (event) => {
-  audio.value = event.target.files?.[0] || null;
+const searchTracks = async () => {
+  if (!searchQuery.value.trim()) {
+    tracks.value = [];
+    selectedTrack.value = null;
+    return;
+  }
+
+  isSearching.value = true;
+  searchError.value = '';
+  try {
+    const { data } = await apiService.searchDeezer(searchQuery.value);
+    tracks.value = data?.tracks || [];
+    if (!tracks.value.length) {
+      searchError.value = 'Aucun résultat Deezer trouvé.';
+    }
+  } catch {
+    tracks.value = [];
+    searchError.value = 'Recherche Deezer indisponible pour le moment.';
+  } finally {
+    isSearching.value = false;
+  }
 };
 
 const submit = async () => {
-  if (!audio.value || !store.player?.id) {
+  if (!selectedTrack.value || !store.player?.id) {
     return;
   }
 
   await apiService.addMusic(route.params.code, {
     playerId: String(store.player.id),
-    title: title.value,
-    artist: artist.value,
-    audio: audio.value,
+    title: selectedTrack.value.title,
+    artist: selectedTrack.value.artist,
+    deezerPreviewUrl: selectedTrack.value.preview,
   });
 
   await store.loadSession(route.params.code);
-  title.value = '';
-  artist.value = '';
-  audio.value = null;
+  selectedTrack.value = null;
+  tracks.value = [];
+  searchQuery.value = '';
 };
 </script>

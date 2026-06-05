@@ -30,8 +30,58 @@ function requireNonEmptyString(value, fieldName) {
   return value.trim();
 }
 
+function requireHttpUrl(value, fieldName) {
+  try {
+    const parsed = new URL(requireNonEmptyString(value, fieldName));
+    if (!['http:', 'https:'].includes(parsed.protocol)) {
+      const error = new Error(`Le champ ${fieldName} doit être une URL HTTP valide`);
+      error.status = 400;
+      throw error;
+    }
+    return parsed.toString();
+  } catch (error) {
+    if (error.status) {
+      throw error;
+    }
+    const invalidUrlError = new Error(`Le champ ${fieldName} doit être une URL valide`);
+    invalidUrlError.status = 400;
+    throw invalidUrlError;
+  }
+}
+
 export default function buildRoutes(gameService, ioNamespace) {
   const router = Router();
+
+  router.get('/deezer/search', async (req, res, next) => {
+    try {
+      const queryText = requireNonEmptyString(req.query?.q, 'q');
+      const response = await fetch(`https://api.deezer.com/search?q=${encodeURIComponent(queryText)}&limit=10`);
+
+      if (!response.ok) {
+        const error = new Error('Deezer indisponible');
+        error.status = 502;
+        throw error;
+      }
+
+      const payload = await response.json();
+      const tracks = Array.isArray(payload?.data)
+        ? payload.data
+            .filter((track) => track?.preview)
+            .map((track) => ({
+              id: track.id,
+              title: track.title,
+              artist: track.artist?.name || 'Inconnu',
+              preview: track.preview,
+              link: track.link || null,
+              cover: track.album?.cover_medium || null,
+            }))
+        : [];
+
+      res.json({ tracks });
+    } catch (error) {
+      next(error);
+    }
+  });
 
   router.post('/sessions', async (req, res, next) => {
     try {
@@ -77,7 +127,14 @@ export default function buildRoutes(gameService, ioNamespace) {
         throw error;
       }
 
-      if (!req.file?.filename) {
+      let filePath = null;
+      if (req.file?.filename) {
+        filePath = `/uploads/${req.file.filename}`;
+      } else if (req.body?.deezerPreviewUrl) {
+        filePath = requireHttpUrl(req.body.deezerPreviewUrl, 'deezerPreviewUrl');
+      }
+
+      if (!filePath) {
         const error = new Error('Le fichier audio est requis');
         error.status = 400;
         throw error;
@@ -87,7 +144,7 @@ export default function buildRoutes(gameService, ioNamespace) {
         playerId,
         title,
         artist,
-        filePath: `/uploads/${req.file.filename}`,
+        filePath,
       });
 
       ioNamespace.to(code).emit('music:add', music);

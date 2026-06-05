@@ -25,7 +25,7 @@ const store = useGameStore();
 const guesses = reactive({});
 
 const origin = import.meta.env.VITE_SOCKET_URL || window.location.origin;
-const audioUrl = (path) => `${origin}${path}`;
+const audioUrl = (path) => (path?.startsWith('http://') || path?.startsWith('https://') ? path : `${origin}${path}`);
 
 const vote = async (musicId) => {
   const guessedPlayerId = Number.parseInt(guesses[musicId], 10);

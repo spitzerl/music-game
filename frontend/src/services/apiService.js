@@ -15,9 +15,19 @@ export default {
     return api.get(`/sessions/${code}`);
   },
   addMusic(code, payload) {
-    const form = new FormData();
-    Object.entries(payload).forEach(([key, value]) => form.append(key, value));
-    return api.post(`/sessions/${code}/musics`, form);
+    if (payload.audio instanceof File) {
+      const form = new FormData();
+      Object.entries(payload).forEach(([key, value]) => form.append(key, value));
+      return api.post(`/sessions/${code}/musics`, form);
+    }
+    return api.post(`/sessions/${code}/musics`, payload);
+  },
+  searchDeezer(query) {
+    return api.get('/deezer/search', {
+      params: {
+        q: query,
+      },
+    });
   },
   startVoting(code) {
     return api.post(`/sessions/${code}/start-voting`);
