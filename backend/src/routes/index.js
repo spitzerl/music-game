@@ -30,6 +30,16 @@ function requireNonEmptyString(value, fieldName) {
   return value.trim();
 }
 
+function requirePositiveInteger(value, fieldName) {
+  const parsed = Number.parseInt(value, 10);
+  if (!Number.isInteger(parsed) || parsed <= 0) {
+    const error = new Error(`Le champ ${fieldName} est invalide`);
+    error.status = 400;
+    throw error;
+  }
+  return parsed;
+}
+
 function requireHttpUrl(value, fieldName) {
   try {
     const parsed = new URL(requireNonEmptyString(value, fieldName));
@@ -49,7 +59,7 @@ function requireHttpUrl(value, fieldName) {
   }
 }
 
-export default function buildRoutes(gameService, ioNamespace) {
+export default function buildRoutes(gameService) {
   const router = Router();
 
   router.get('/deezer/search', async (req, res, next) => {
@@ -86,7 +96,9 @@ export default function buildRoutes(gameService, ioNamespace) {
   router.post('/sessions', async (req, res, next) => {
     try {
       const hostName = requireNonEmptyString(req.body?.hostName, 'hostName');
-      const data = await gameService.createSession(hostName);
+      const clientId = requireNonEmptyString(req.body?.clientId, 'clientId');
+      const config = req.body?.config || {};
+      const data = await gameService.createSession(hostName, { clientId, config });
       res.status(201).json(data);
     } catch (error) {
       next(error);
@@ -96,9 +108,9 @@ export default function buildRoutes(gameService, ioNamespace) {
   router.post('/sessions/:code/join', async (req, res, next) => {
     try {
       const playerName = requireNonEmptyString(req.body?.playerName, 'playerName');
+      const clientId = requireNonEmptyString(req.body?.clientId, 'clientId');
       const code = requireNonEmptyString(req.params.code, 'code').toUpperCase();
-      const data = await gameService.joinSession(code, playerName);
-      ioNamespace.to(code).emit('state:update', await gameService.getState(code));
+      const data = await gameService.joinSession(code, playerName, { clientId });
       res.status(201).json(data);
     } catch (error) {
       next(error);
@@ -108,7 +120,54 @@ export default function buildRoutes(gameService, ioNamespace) {
   router.get('/sessions/:code', async (req, res, next) => {
     try {
       const code = requireNonEmptyString(req.params.code, 'code').toUpperCase();
-      res.json(await gameService.getState(code));
+      const playerId = req.query?.playerId ? requirePositiveInteger(req.query.playerId, 'playerId') : null;
+      res.json(await gameService.getState(code, playerId));
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  router.patch('/sessions/:code/config', async (req, res, next) => {
+    try {
+      const code = requireNonEmptyString(req.params.code, 'code').toUpperCase();
+      const hostPlayerId = requirePositiveInteger(req.body?.hostPlayerId, 'hostPlayerId');
+      const config = req.body?.config || {};
+      const session = await gameService.updateConfig(code, hostPlayerId, config);
+      res.json({ session });
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  router.post('/sessions/:code/bots', async (req, res, next) => {
+    try {
+      const code = requireNonEmptyString(req.params.code, 'code').toUpperCase();
+      const hostPlayerId = requirePositiveInteger(req.body?.hostPlayerId, 'hostPlayerId');
+      const name = requireNonEmptyString(req.body?.name, 'name');
+      const bot = await gameService.addBot(code, hostPlayerId, name);
+      res.status(201).json({ bot });
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  router.post('/sessions/:code/start-selection', async (req, res, next) => {
+    try {
+      const code = requireNonEmptyString(req.params.code, 'code').toUpperCase();
+      const hostPlayerId = requirePositiveInteger(req.body?.hostPlayerId, 'hostPlayerId');
+      const state = await gameService.startSelection(code, hostPlayerId);
+      res.json(state);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  router.post('/sessions/:code/start-voting', async (req, res, next) => {
+    try {
+      const code = requireNonEmptyString(req.params.code, 'code').toUpperCase();
+      const hostPlayerId = requirePositiveInteger(req.body?.hostPlayerId, 'hostPlayerId');
+      const state = await gameService.startVoting(code, hostPlayerId, { automatic: false });
+      res.json(state);
     } catch (error) {
       next(error);
     }
@@ -117,15 +176,9 @@ export default function buildRoutes(gameService, ioNamespace) {
   router.post('/sessions/:code/musics', upload.single('audio'), async (req, res, next) => {
     try {
       const code = requireNonEmptyString(req.params.code, 'code').toUpperCase();
-      const playerId = Number.parseInt(requireNonEmptyString(req.body?.playerId, 'playerId'), 10);
+      const playerId = requirePositiveInteger(req.body?.playerId, 'playerId');
       const title = requireNonEmptyString(req.body?.title, 'title');
       const artist = requireNonEmptyString(req.body?.artist, 'artist');
-
-      if (!Number.isInteger(playerId) || playerId <= 0) {
-        const error = new Error('playerId invalide');
-        error.status = 400;
-        throw error;
-      }
 
       let filePath = null;
       if (req.file?.filename) {
@@ -147,20 +200,19 @@ export default function buildRoutes(gameService, ioNamespace) {
         filePath,
       });
 
-      ioNamespace.to(code).emit('music:add', music);
-      ioNamespace.to(code).emit('state:update', await gameService.getState(code));
       res.status(201).json(music);
     } catch (error) {
       next(error);
     }
   });
 
-  router.post('/sessions/:code/start-voting', async (req, res, next) => {
+  router.delete('/sessions/:code/musics/:musicId', async (req, res, next) => {
     try {
       const code = requireNonEmptyString(req.params.code, 'code').toUpperCase();
-      const state = await gameService.setPhase(code, 'voting');
-      ioNamespace.to(code).emit('state:update', state);
-      res.json(state);
+      const playerId = requirePositiveInteger(req.body?.playerId, 'playerId');
+      const musicId = requirePositiveInteger(req.params.musicId, 'musicId');
+      const removed = await gameService.removeMusic(code, playerId, musicId);
+      res.json({ removed });
     } catch (error) {
       next(error);
     }
@@ -169,25 +221,22 @@ export default function buildRoutes(gameService, ioNamespace) {
   router.post('/sessions/:code/votes', async (req, res, next) => {
     try {
       const code = requireNonEmptyString(req.params.code, 'code').toUpperCase();
-      const voterId = Number.parseInt(requireNonEmptyString(req.body?.voterId, 'voterId'), 10);
-      const musicId = Number.parseInt(requireNonEmptyString(req.body?.musicId, 'musicId'), 10);
-      const guessedPlayerId = Number.parseInt(requireNonEmptyString(req.body?.guessedPlayerId, 'guessedPlayerId'), 10);
+      const voterId = requirePositiveInteger(req.body?.voterId, 'voterId');
+      const guessedPlayerId = requirePositiveInteger(req.body?.guessedPlayerId, 'guessedPlayerId');
 
-      const state = await gameService.submitVote(code, voterId, musicId, guessedPlayerId);
-      ioNamespace.to(code).emit('vote:submit', { voterId, musicId, guessedPlayerId });
-      ioNamespace.to(code).emit('state:update', state);
+      const state = await gameService.submitVote(code, voterId, guessedPlayerId);
       res.json(state);
     } catch (error) {
       next(error);
     }
   });
 
-  router.post('/sessions/:code/finish', async (req, res, next) => {
+  router.post('/sessions/:code/relaunch', async (req, res, next) => {
     try {
       const code = requireNonEmptyString(req.params.code, 'code').toUpperCase();
-      const state = await gameService.setPhase(code, 'results');
-      ioNamespace.to(code).emit('state:update', state);
-      res.json(await gameService.getResults(code));
+      const hostPlayerId = requirePositiveInteger(req.body?.hostPlayerId, 'hostPlayerId');
+      const state = await gameService.relaunchSession(code, hostPlayerId);
+      res.json(state);
     } catch (error) {
       next(error);
     }

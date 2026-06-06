@@ -9,7 +9,7 @@ import buildRoutes from './routes/index.js';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-export default function createApp(gameService, ioNamespace) {
+export default function createApp(gameService) {
   const app = express();
 
   app.use(
@@ -27,7 +27,7 @@ export default function createApp(gameService, ioNamespace) {
     res.json({ ok: true });
   });
 
-  app.use('/api', buildRoutes(gameService, ioNamespace));
+  app.use('/api', buildRoutes(gameService));
 
   app.use((error, _req, res, _next) => {
     const status = error.status || 500;

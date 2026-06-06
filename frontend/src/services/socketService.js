@@ -13,8 +13,12 @@ export default {
     }
     return socket;
   },
-  join(code) {
-    this.connect().emit('join', { code });
+  join(code, playerId) {
+    this.connect().emit('join', { code, playerId });
+  },
+  leave() {
+    if (!socket) return;
+    socket.emit('leave');
   },
   on(event, callback) {
     this.connect().on(event, callback);

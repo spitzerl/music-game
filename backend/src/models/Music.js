@@ -20,4 +20,25 @@ export default class Music {
     const result = await query('SELECT * FROM musics WHERE id = $1', [musicId]);
     return result.rows[0] || null;
   }
+
+  static async countByPlayer(sessionId) {
+    const result = await query(
+      `SELECT player_id, COUNT(*)::int AS count
+       FROM musics
+       WHERE session_id = $1
+       GROUP BY player_id`,
+      [sessionId]
+    );
+    return result.rows;
+  }
+
+  static async deleteById(musicId, playerId, sessionId) {
+    const result = await query(
+      `DELETE FROM musics
+       WHERE id = $1 AND player_id = $2 AND session_id = $3
+       RETURNING *`,
+      [musicId, playerId, sessionId]
+    );
+    return result.rows[0] || null;
+  }
 }
