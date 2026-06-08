@@ -153,8 +153,8 @@
               >
                 <span>{{ target.name }}</span>
                 <!-- Vote Counter -->
-                <span v-if="getVoteCountForPlayer(target.id) > 0" class="text-[10px] bg-cyan-500/20 text-cyan-400 px-2 py-0.5 rounded border border-cyan-500/30">
-                  {{ getVoteCountForPlayer(target.id) }} vote(s)
+                <span v-if="store.session?.show_vote_count && getVoteCountForPlayer(target.id) > 0" class="w-6 h-6 flex items-center justify-center text-[11px] bg-cyan-500/20 text-cyan-400 rounded-full border border-cyan-500/30 font-bold">
+                  {{ getVoteCountForPlayer(target.id) }}
                 </span>
               </button>
             </div>

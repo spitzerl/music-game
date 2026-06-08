@@ -213,6 +213,17 @@ export default function buildRoutes(gameService, ioNamespace) {
     }
   });
 
+  router.post('/sessions/:code/start-round', async (req, res, next) => {
+    try {
+      const code = requireNonEmptyString(req.params.code, 'code').toUpperCase();
+      const state = await gameService.startRound(code);
+      await gameService.broadcastState(code);
+      res.json(state);
+    } catch (error) {
+      next(error);
+    }
+  });
+
   router.post('/sessions/:code/votes', async (req, res, next) => {
     try {
       const code = requireNonEmptyString(req.params.code, 'code').toUpperCase();

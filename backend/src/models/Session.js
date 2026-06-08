@@ -24,7 +24,7 @@ export default class Session {
     return result.rows[0] || null;
   }
 
-  static async updateConfig(code, { maxMusicsPerPlayer, selectionDuration, extractDuration, votingDuration, showAnswers, maxPlayers, autoAdvance }) {
+  static async updateConfig(code, { maxMusicsPerPlayer, selectionDuration, extractDuration, votingDuration, showAnswers, maxPlayers, autoAdvance, showVoteCount }) {
     const result = await query(
       `UPDATE sessions 
        SET max_musics_per_player = COALESCE($1, max_musics_per_player),
@@ -34,9 +34,10 @@ export default class Session {
            show_answers = COALESCE($5, show_answers),
            max_players = COALESCE($6, max_players),
            auto_advance = COALESCE($7, auto_advance),
+           show_vote_count = COALESCE($8, show_vote_count),
            updated_at = NOW()
-       WHERE code = $8 RETURNING *`,
-      [maxMusicsPerPlayer, selectionDuration, extractDuration, votingDuration, showAnswers, maxPlayers, autoAdvance, code]
+       WHERE code = $9 RETURNING *`,
+      [maxMusicsPerPlayer, selectionDuration, extractDuration, votingDuration, showAnswers, maxPlayers, autoAdvance, showVoteCount, code]
     );
     return result.rows[0] || null;
   }

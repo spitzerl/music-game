@@ -116,6 +116,12 @@
             <input type="checkbox" v-model="config.autoAdvance" :disabled="!isHost" @change="saveConfig" class="w-5 h-5 rounded border-slate-700 bg-slate-900 text-cyan-500 focus:ring-cyan-500 disabled:opacity-60 disabled:cursor-not-allowed" />
           </div>
 
+          <!-- Show Vote Count -->
+          <div class="flex items-center justify-between py-2 border-b border-slate-800">
+            <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Afficher le nombre de votes par suspect</span>
+            <input type="checkbox" v-model="config.showVoteCount" :disabled="!isHost" @change="saveConfig" class="w-5 h-5 rounded border-slate-700 bg-slate-900 text-cyan-500 focus:ring-cyan-500 disabled:opacity-60 disabled:cursor-not-allowed" />
+          </div>
+
           <!-- Max Players -->
           <div>
             <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Limite de joueurs</label>
@@ -232,7 +238,8 @@ const config = reactive({
   votingDuration: 30,
   showAnswers: true,
   maxPlayers: 8,
-  autoAdvance: false
+  autoAdvance: false,
+  showVoteCount: true
 });
 
 const isHost = computed(() => {
@@ -249,6 +256,7 @@ const loadAndSyncConfig = async () => {
     config.showAnswers = store.session.show_answers;
     config.maxPlayers = store.session.max_players;
     config.autoAdvance = store.session.auto_advance;
+    config.showVoteCount = store.session.show_vote_count;
   }
 };
 
@@ -275,6 +283,7 @@ watch(() => store.session, (newSession) => {
     config.showAnswers = newSession.show_answers;
     config.maxPlayers = newSession.max_players;
     config.autoAdvance = newSession.auto_advance;
+    config.showVoteCount = newSession.show_vote_count;
     
     // Redirect if phase is already started
     if (newSession.phase === 'selection') {
@@ -309,7 +318,8 @@ const saveConfig = async () => {
       votingDuration: config.votingDuration,
       showAnswers: config.showAnswers,
       maxPlayers: config.maxPlayers,
-      autoAdvance: config.autoAdvance
+      autoAdvance: config.autoAdvance,
+      showVoteCount: config.showVoteCount
     });
   } catch (err) {
     console.error("Failed to update config:", err);
