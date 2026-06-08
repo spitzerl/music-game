@@ -1,5 +1,5 @@
 <template>
-  <div class="min-h-screen p-6 max-w-5xl mx-auto flex flex-col justify-between">
+  <div class="min-h-screen p-6 max-w-5xl mx-auto flex flex-col justify-between opacity-0 animate-fade-in-up">
     <!-- Header -->
     <header class="flex justify-between items-center mb-8 pb-4 border-b border-slate-800">
       <div>
@@ -27,7 +27,7 @@
       <section v-if="podium.length" class="flex flex-col sm:flex-row items-end justify-center gap-6 pt-12 pb-4">
         <!-- 2nd Place -->
         <div v-if="podium[1]" class="order-2 sm:order-1 flex flex-col items-center w-full sm:w-44">
-          <div class="relative glass-panel w-full p-5 rounded-t-2xl border-b-0 border-slate-700/80 flex flex-col items-center justify-end h-40 shadow-lg text-center">
+          <div class="relative glass-panel w-full p-5 rounded-t-2xl border-b-0 border-slate-700/80 flex flex-col items-center justify-end h-40 shadow-lg text-center animate-grow-y" style="animation-delay: 0.15s;">
             <span class="absolute -top-6 w-10 h-10 rounded-full bg-slate-400/20 text-slate-300 border border-slate-400/40 flex items-center justify-center font-black text-sm">2</span>
             <p class="font-extrabold text-white truncate max-w-full text-base mb-1">{{ podium[1].name }}</p>
             <p class="text-xl font-black text-slate-300 font-mono">{{ podium[1].score }} <span class="text-xs font-normal">pts</span></p>
@@ -37,7 +37,7 @@
 
         <!-- 1st Place -->
         <div v-if="podium[0]" class="order-1 sm:order-2 flex flex-col items-center w-full sm:w-48 transform -translate-y-4">
-          <div class="relative bg-gradient-to-b from-yellow-500/20 to-amber-500/10 border border-yellow-500/30 w-full p-6 rounded-t-3xl border-b-0 flex flex-col items-center justify-end h-48 shadow-2xl text-center">
+          <div class="relative bg-gradient-to-b from-yellow-500/20 to-amber-500/10 border border-yellow-500/30 w-full p-6 rounded-t-3xl border-b-0 flex flex-col items-center justify-end h-48 shadow-2xl text-center animate-grow-y" style="animation-delay: 0.3s;">
             <!-- Crown icon -->
             <div class="absolute -top-8 text-yellow-400 animate-bounce">
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-10 h-10">
@@ -52,7 +52,7 @@
 
         <!-- 3rd Place -->
         <div v-if="podium[2]" class="order-3 flex flex-col items-center w-full sm:w-40">
-          <div class="relative glass-panel w-full p-4 rounded-t-2xl border-b-0 border-slate-700/80 flex flex-col items-center justify-end h-32 shadow-lg text-center">
+          <div class="relative glass-panel w-full p-4 rounded-t-2xl border-b-0 border-slate-700/80 flex flex-col items-center justify-end h-32 shadow-lg text-center animate-grow-y" style="animation-delay: 0s;">
             <span class="absolute -top-6 w-10 h-10 rounded-full bg-amber-700/20 text-amber-600 border border-amber-700/40 flex items-center justify-center font-black text-sm">3</span>
             <p class="font-extrabold text-white truncate max-w-full text-sm mb-1">{{ podium[2].name }}</p>
             <p class="text-lg font-black text-amber-600 font-mono">{{ podium[2].score }} <span class="text-xs font-normal">pts</span></p>
