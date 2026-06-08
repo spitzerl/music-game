@@ -17,7 +17,7 @@ async function initSchema() {
       id SERIAL PRIMARY KEY,
       code VARCHAR(6) UNIQUE NOT NULL,
       host_name VARCHAR(100) NOT NULL,
-      phase VARCHAR(20) NOT NULL DEFAULT 'selection',
+      phase VARCHAR(20) NOT NULL DEFAULT 'waiting',
       created_at TIMESTAMP NOT NULL DEFAULT NOW(),
       updated_at TIMESTAMP NOT NULL DEFAULT NOW()
     )
@@ -56,6 +56,31 @@ async function initSchema() {
       UNIQUE (session_id, voter_id, music_id)
     )
   `);
+
+  await pool.query(`
+    ALTER TABLE sessions 
+    ADD COLUMN IF NOT EXISTS max_musics_per_player INTEGER DEFAULT 3,
+    ADD COLUMN IF NOT EXISTS selection_duration INTEGER DEFAULT 120,
+    ADD COLUMN IF NOT EXISTS extract_duration INTEGER DEFAULT 20,
+    ADD COLUMN IF NOT EXISTS voting_duration INTEGER DEFAULT 30,
+    ADD COLUMN IF NOT EXISTS show_answers BOOLEAN DEFAULT TRUE,
+    ADD COLUMN IF NOT EXISTS max_players INTEGER DEFAULT 12,
+    ADD COLUMN IF NOT EXISTS current_music_index INTEGER DEFAULT -1,
+    ADD COLUMN IF NOT EXISTS voting_status VARCHAR(20) DEFAULT 'idle',
+    ADD COLUMN IF NOT EXISTS timer_ends_at TIMESTAMP;
+  `);
+
+  await pool.query(`
+    ALTER TABLE players
+    ADD COLUMN IF NOT EXISTS is_connected BOOLEAN DEFAULT TRUE,
+    ADD COLUMN IF NOT EXISTS is_bot BOOLEAN DEFAULT FALSE,
+    ADD COLUMN IF NOT EXISTS is_observer BOOLEAN DEFAULT FALSE;
+  `);
+
+  await pool.query(`
+    ALTER TABLE musics
+    ADD COLUMN IF NOT EXISTS play_order INTEGER DEFAULT -1;
+  `);
 }
 
 async function bootstrap() {
@@ -77,11 +102,14 @@ async function bootstrap() {
 
     const gameNamespace = io.of('/game');
     const gameService = new GameService();
+    gameService.setIoNamespace(gameNamespace);
     registerGameSocket(gameNamespace, gameService);
 
     const app = createApp(gameService, gameNamespace);
     const server = createServer(app);
     io.attach(server);
+
+    await gameService.recoverSessions();
 
     server.listen(PORT, () => {
       console.log(`Backend running on http://localhost:${PORT}`);

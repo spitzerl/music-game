@@ -13,8 +13,8 @@ export default {
     }
     return socket;
   },
-  join(code) {
-    this.connect().emit('join', { code });
+  join(code, playerId = null) {
+    this.connect().emit('join', { code, playerId });
   },
   on(event, callback) {
     this.connect().on(event, callback);

@@ -20,4 +20,24 @@ export default class Music {
     const result = await query('SELECT * FROM musics WHERE id = $1', [musicId]);
     return result.rows[0] || null;
   }
+
+  static async deleteMusic(musicId, playerId) {
+    const result = await query(
+      'DELETE FROM musics WHERE id = $1 AND player_id = $2 RETURNING *',
+      [musicId, playerId]
+    );
+    return result.rows[0] || null;
+  }
+
+  static async updatePlayOrder(musicId, playOrder) {
+    const result = await query(
+      'UPDATE musics SET play_order = $1 WHERE id = $2 RETURNING *',
+      [playOrder, musicId]
+    );
+    return result.rows[0] || null;
+  }
+
+  static async deleteAllBySession(sessionId) {
+    await query('DELETE FROM musics WHERE session_id = $1', [sessionId]);
+  }
 }

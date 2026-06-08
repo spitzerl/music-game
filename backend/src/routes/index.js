@@ -98,7 +98,8 @@ export default function buildRoutes(gameService, ioNamespace) {
       const playerName = requireNonEmptyString(req.body?.playerName, 'playerName');
       const code = requireNonEmptyString(req.params.code, 'code').toUpperCase();
       const data = await gameService.joinSession(code, playerName);
-      ioNamespace.to(code).emit('state:update', await gameService.getState(code));
+      await gameService.broadcastState(code);
+      ioNamespace.to(code).emit('sound:play', { type: 'join' });
       res.status(201).json(data);
     } catch (error) {
       next(error);
@@ -108,7 +109,41 @@ export default function buildRoutes(gameService, ioNamespace) {
   router.get('/sessions/:code', async (req, res, next) => {
     try {
       const code = requireNonEmptyString(req.params.code, 'code').toUpperCase();
-      res.json(await gameService.getState(code));
+      const playerId = req.query.playerId || null;
+      res.json(await gameService.getState(code, playerId));
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  router.post('/sessions/:code/config', async (req, res, next) => {
+    try {
+      const code = requireNonEmptyString(req.params.code, 'code').toUpperCase();
+      const state = await gameService.updateConfig(code, req.body);
+      await gameService.broadcastState(code);
+      res.json(state);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  router.post('/sessions/:code/bots', async (req, res, next) => {
+    try {
+      const code = requireNonEmptyString(req.params.code, 'code').toUpperCase();
+      const state = await gameService.addBot(code);
+      await gameService.broadcastState(code);
+      ioNamespace.to(code).emit('sound:play', { type: 'join' });
+      res.json(state);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  router.post('/sessions/:code/start-selection', async (req, res, next) => {
+    try {
+      const code = requireNonEmptyString(req.params.code, 'code').toUpperCase();
+      const state = await gameService.startSelection(code);
+      res.json(state);
     } catch (error) {
       next(error);
     }
@@ -147,9 +182,21 @@ export default function buildRoutes(gameService, ioNamespace) {
         filePath,
       });
 
-      ioNamespace.to(code).emit('music:add', music);
-      ioNamespace.to(code).emit('state:update', await gameService.getState(code));
+      await gameService.broadcastState(code);
       res.status(201).json(music);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  router.delete('/sessions/:code/musics/:musicId', async (req, res, next) => {
+    try {
+      const code = requireNonEmptyString(req.params.code, 'code').toUpperCase();
+      const musicId = Number.parseInt(requireNonEmptyString(req.params.musicId, 'musicId'), 10);
+      const playerId = Number.parseInt(requireNonEmptyString(req.body?.playerId || req.query?.playerId, 'playerId'), 10);
+      const state = await gameService.deleteMusic(code, musicId, playerId);
+      await gameService.broadcastState(code);
+      res.json(state);
     } catch (error) {
       next(error);
     }
@@ -158,8 +205,8 @@ export default function buildRoutes(gameService, ioNamespace) {
   router.post('/sessions/:code/start-voting', async (req, res, next) => {
     try {
       const code = requireNonEmptyString(req.params.code, 'code').toUpperCase();
-      const state = await gameService.setPhase(code, 'voting');
-      ioNamespace.to(code).emit('state:update', state);
+      await gameService.startVoting(code);
+      const state = await gameService.getState(code);
       res.json(state);
     } catch (error) {
       next(error);
@@ -174,8 +221,6 @@ export default function buildRoutes(gameService, ioNamespace) {
       const guessedPlayerId = Number.parseInt(requireNonEmptyString(req.body?.guessedPlayerId, 'guessedPlayerId'), 10);
 
       const state = await gameService.submitVote(code, voterId, musicId, guessedPlayerId);
-      ioNamespace.to(code).emit('vote:submit', { voterId, musicId, guessedPlayerId });
-      ioNamespace.to(code).emit('state:update', state);
       res.json(state);
     } catch (error) {
       next(error);
@@ -185,9 +230,18 @@ export default function buildRoutes(gameService, ioNamespace) {
   router.post('/sessions/:code/finish', async (req, res, next) => {
     try {
       const code = requireNonEmptyString(req.params.code, 'code').toUpperCase();
-      const state = await gameService.setPhase(code, 'results');
-      ioNamespace.to(code).emit('state:update', state);
-      res.json(await gameService.getResults(code));
+      const results = await gameService.finishSession(code);
+      res.json(results);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  router.post('/sessions/:code/reset', async (req, res, next) => {
+    try {
+      const code = requireNonEmptyString(req.params.code, 'code').toUpperCase();
+      const state = await gameService.resetSession(code);
+      res.json(state);
     } catch (error) {
       next(error);
     }

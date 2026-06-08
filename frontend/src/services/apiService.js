@@ -11,8 +11,17 @@ export default {
   joinSession(code, playerName) {
     return api.post(`/sessions/${code}/join`, { playerName });
   },
-  getSession(code) {
-    return api.get(`/sessions/${code}`);
+  getSession(code, playerId = null) {
+    return api.get(`/sessions/${code}`, { params: { playerId } });
+  },
+  updateConfig(code, config) {
+    return api.post(`/sessions/${code}/config`, config);
+  },
+  addBot(code) {
+    return api.post(`/sessions/${code}/bots`);
+  },
+  startSelection(code) {
+    return api.post(`/sessions/${code}/start-selection`);
   },
   addMusic(code, payload) {
     if (payload.audio instanceof File) {
@@ -21,6 +30,9 @@ export default {
       return api.post(`/sessions/${code}/musics`, form);
     }
     return api.post(`/sessions/${code}/musics`, payload);
+  },
+  deleteMusic(code, musicId, playerId) {
+    return api.delete(`/sessions/${code}/musics/${musicId}`, { params: { playerId } });
   },
   searchDeezer(query) {
     return api.get('/deezer/search', {
@@ -40,5 +52,8 @@ export default {
   },
   finishSession(code) {
     return api.post(`/sessions/${code}/finish`);
+  },
+  resetSession(code) {
+    return api.post(`/sessions/${code}/reset`);
   },
 };

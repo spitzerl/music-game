@@ -8,6 +8,9 @@ export default defineConfig(({ mode }) => {
     plugins: [vue()],
     server: {
       port: 3000,
+      watch: {
+        usePolling: true,
+      },
       proxy: {
         '/api': {
           target: env.VITE_API_URL?.replace('/api', '') || 'http://localhost:3001',

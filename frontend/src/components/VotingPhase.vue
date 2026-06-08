@@ -1,42 +1,331 @@
 <template>
-  <section class="mx-auto max-w-3xl p-6">
-    <h2 class="mb-4 text-2xl font-bold">Phase de vote</h2>
+  <div class="min-h-screen p-6 max-w-5xl mx-auto flex flex-col justify-between">
+    <!-- Header -->
+    <header class="flex justify-between items-center mb-6 pb-4 border-b border-slate-800">
+      <div>
+        <h1 class="text-3xl font-extrabold text-white flex items-center gap-2">
+          <span>Phase de Vote</span>
+        </h1>
+        <p class="text-slate-400 text-sm">
+          Morceau <span class="text-cyan-400 font-bold font-mono">{{ (store.session?.current_music_index || 0) + 1 }}</span>
+        </p>
+      </div>
 
-    <article v-for="music in store.musics" :key="music.id" class="mb-6 rounded bg-slate-900 p-4">
-      <h3 class="mb-2 text-lg font-semibold">{{ music.title }}</h3>
-      <audio class="mb-3 w-full" controls :src="audioUrl(music.file_path)"></audio>
-      <select v-model="guesses[music.id]" class="w-full rounded px-3 py-2">
-        <option disabled value="">Qui a proposé ce morceau ?</option>
-        <option v-for="player in store.players" :key="player.id" :value="player.id">{{ player.name }}</option>
-      </select>
-      <button class="mt-3 rounded bg-indigo-500 px-4 py-2 font-semibold text-white" @click="vote(music.id)">Valider</button>
-    </article>
-  </section>
+      <!-- Timer -->
+      <div :class="['flex items-center gap-2 px-4 py-2 rounded-xl border font-bold text-lg transition-all duration-300', remainingTime < 10 ? 'bg-rose-500/10 border-rose-500 text-rose-400 animate-pulse' : 'bg-slate-900 border-slate-800 text-cyan-400']">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-5 h-5">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+        </svg>
+        <span class="font-mono">{{ remainingTime }}s</span>
+      </div>
+    </header>
+
+    <!-- Main Board -->
+    <main class="grid gap-8 mb-8 items-start">
+      <!-- Status Box -->
+      <section class="glass-panel p-8 rounded-3xl border border-slate-800 text-center relative overflow-hidden flex flex-col items-center justify-center min-h-[300px]">
+        <!-- Listening Phase -->
+        <div v-if="status === 'listening'" class="space-y-6">
+          <!-- Animated soundwave -->
+          <div class="flex items-end justify-center gap-1.5 h-16 mb-4">
+            <span class="w-2 bg-cyan-400 rounded-full animate-bounce" style="animation-duration: 0.6s;"></span>
+            <span class="w-2 bg-cyan-500 rounded-full animate-bounce h-12" style="animation-duration: 0.4s;"></span>
+            <span class="w-2 bg-purple-500 rounded-full animate-bounce h-16" style="animation-duration: 0.7s;"></span>
+            <span class="w-2 bg-purple-600 rounded-full animate-bounce h-8" style="animation-duration: 0.5s;"></span>
+            <span class="w-2 bg-cyan-400 rounded-full animate-bounce h-14" style="animation-duration: 0.8s;"></span>
+          </div>
+          <h2 class="text-2xl font-extrabold text-white">Écoute en cours...</h2>
+          <p class="text-slate-400 text-sm max-w-md mx-auto">
+            Écoutez attentivement l'extrait audio. Les votes ouvriront dès que la lecture sera terminée.
+          </p>
+        </div>
+
+        <!-- Voting Phase -->
+        <div v-else-if="status === 'voting'" class="space-y-4 w-full">
+          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 text-xs font-bold uppercase tracking-wider mb-2">
+            Vote Ouvert
+          </div>
+          <h2 class="text-3xl font-extrabold text-white">Qui a proposé ce morceau ?</h2>
+          
+          <!-- Track details revealed -->
+          <div class="bg-slate-900/80 border border-slate-800 p-5 rounded-2xl max-w-md mx-auto flex items-center gap-4 text-left shadow-lg">
+            <div class="w-14 h-14 rounded-xl bg-gradient-to-tr from-cyan-500 to-purple-600 flex items-center justify-center text-white shadow-md">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-7 h-7">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 9l10.5-3m0 0L21 8.25M19.5 6C19 6 13 12 13 12v6.75m0 0a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+              </svg>
+            </div>
+            <div class="min-w-0">
+              <p class="font-extrabold text-white text-base truncate">{{ store.currentMusic?.title }}</p>
+              <p class="text-slate-400 text-sm truncate">{{ store.currentMusic?.artist }}</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Revelation Phase -->
+        <div v-else-if="status === 'revelation'" class="space-y-6 w-full">
+          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-xs font-bold uppercase tracking-wider">
+            Révélation
+          </div>
+          <h2 class="text-xl font-bold text-slate-400">Le morceau a été proposé par</h2>
+          
+          <!-- Proposer reveal badge -->
+          <div class="inline-block bg-gradient-to-r from-yellow-500/20 to-amber-500/20 border border-yellow-500/30 px-8 py-4 rounded-3xl shadow-xl animate-float">
+            <p class="text-4xl font-extrabold text-yellow-400 tracking-tight">{{ proposerName }}</p>
+          </div>
+
+          <div class="bg-slate-900/60 border border-slate-800 p-4 rounded-2xl max-w-sm mx-auto">
+            <p class="text-sm font-semibold text-white truncate">{{ store.currentMusic?.title }}</p>
+            <p class="text-xs text-slate-400 truncate">{{ store.currentMusic?.artist }}</p>
+          </div>
+        </div>
+
+        <!-- Volume slider control -->
+        <div class="absolute bottom-4 right-4 flex items-center gap-2 bg-slate-950/80 px-3 py-1.5 rounded-lg border border-slate-800">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-4 h-4 text-slate-400">
+            <path d="M13.5 4.06c0-1.336-1.616-2.005-2.56-1.06l-4.5 4.5H4.508c-1.141 0-2.063.922-2.063 2.063v4.875c0 1.141.922 2.062 2.062 2.062H6.44l4.5 4.5c.944.945 2.56.276 2.56-1.06V4.06ZM17.78 9.22a.75.75 0 1 0-1.06 1.06L18.44 12l-1.72 1.72a.75.75 0 0 0 1.06 1.06l1.72-1.72 1.72 1.72a.75.75 0 1 0 1.06-1.06L20.56 12l1.72-1.72a.75.75 0 0 0-1.06-1.06l-1.72 1.72-1.72-1.72Z" />
+          </svg>
+          <input type="range" min="0" max="1" step="0.05" v-model="volume" @input="updateVolume" class="w-16 h-1 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-cyan-500" />
+        </div>
+      </section>
+
+      <!-- Interactive Zone (Voting List or Revelation Details) -->
+      <section class="glass-panel p-6 rounded-2xl border border-slate-800">
+        <!-- Voting Active -->
+        <div v-if="status === 'voting'" class="space-y-4">
+          <!-- Proposer Message -->
+          <div v-if="isProposer" class="text-center py-6 bg-slate-900/40 border border-slate-800 p-4 rounded-xl text-slate-400 italic text-sm">
+            Vous avez proposé ce morceau. Observez les votes des autres joueurs en direct !
+          </div>
+          <!-- Observer Message -->
+          <div v-else-if="isObserver" class="text-center py-6 bg-slate-900/40 border border-slate-800 p-4 rounded-xl text-slate-400 italic text-sm">
+            Vous êtes spectateur de cette partie. Observez les votes en direct !
+          </div>
+
+          <!-- Voter Buttons Grid -->
+          <div v-else class="space-y-3">
+            <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Sélectionnez le suspect :</p>
+            <div class="grid sm:grid-cols-2 gap-4">
+              <button
+                v-for="target in eligiblePlayers"
+                :key="target.id"
+                @click="castVote(target.id)"
+                :class="['p-4 rounded-xl border text-left font-bold transition-all flex justify-between items-center', selectedVoteId === target.id ? 'bg-cyan-500/10 border-cyan-500 text-white shadow-md shadow-cyan-500/10' : 'bg-slate-900/60 border-slate-800 text-slate-300 hover:border-slate-700 hover:text-white']"
+              >
+                <span>{{ target.name }}</span>
+                <!-- Vote Counter -->
+                <span v-if="getVoteCountForPlayer(target.id) > 0" class="text-[10px] bg-cyan-500/20 text-cyan-400 px-2 py-0.5 rounded border border-cyan-500/30">
+                  {{ getVoteCountForPlayer(target.id) }} vote(s)
+                </span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Revelation Details -->
+        <div v-else-if="status === 'revelation'" class="space-y-4">
+          <h3 class="text-lg font-bold text-white mb-4">Détail des votes</h3>
+          <div class="space-y-2 max-h-60 overflow-y-auto pr-2">
+            <div v-for="vote in store.votes" :key="vote.id" class="flex items-center justify-between p-3 rounded-xl bg-slate-900/60 border border-slate-850">
+              <div class="flex items-center gap-2">
+                <span class="font-bold text-slate-200 text-sm">{{ getPlayerName(vote.voter_id) }}</span>
+                <span class="text-xs text-slate-500">pense que c'est</span>
+                <span class="font-bold text-slate-200 text-sm">{{ getPlayerName(vote.guessed_player_id) }}</span>
+              </div>
+              
+              <!-- Success / Failure Badge -->
+              <span v-if="vote.guessed_player_id === store.currentMusic?.player_id" class="text-[10px] bg-emerald-500/10 text-emerald-400 px-2 py-0.5 rounded border border-emerald-500/20 font-bold uppercase">
+                ✓ Correct +2
+              </span>
+              <span v-else class="text-[10px] bg-rose-500/10 text-rose-400 px-2 py-0.5 rounded border border-rose-500/20 font-bold uppercase">
+                ✗ Incorrect
+              </span>
+            </div>
+            <p v-if="!store.votes?.length" class="text-xs text-slate-500 italic text-center py-4">Aucun joueur n'a voté sur ce morceau.</p>
+          </div>
+        </div>
+
+        <!-- Listening Lock Info -->
+        <div v-else-if="status === 'listening'" class="text-center py-6 text-slate-500 italic text-sm">
+          Les options de vote apparaîtront dès la fin de l'écoute.
+        </div>
+      </section>
+    </main>
+  </div>
 </template>
 
 <script setup>
-import { reactive } from 'vue';
-import { useRoute } from 'vue-router';
-import apiService from '../services/apiService';
+import { ref, computed, onMounted, onUnmounted, watch } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
 import { useGameStore } from '../stores/gameStore';
 
 const route = useRoute();
+const router = useRouter();
 const store = useGameStore();
-const guesses = reactive({});
 
-const origin = import.meta.env.VITE_SOCKET_URL || window.location.origin;
-const audioUrl = (path) => (path?.startsWith('http://') || path?.startsWith('https://') ? path : `${origin}${path}`);
+const remainingTime = ref(0);
+let timerInterval = null;
 
-const vote = async (musicId) => {
-  const guessedPlayerId = Number.parseInt(guesses[musicId], 10);
-  if (!store.player?.id || !guessedPlayerId) {
+// Local Player State
+const selectedVoteId = ref(null);
+const volume = ref(localStorage.getItem('harmonix_volume') ? Number(localStorage.getItem('harmonix_volume')) : 0.5);
+
+// Audio State
+let audio = null;
+
+const status = computed(() => store.session?.voting_status || 'listening');
+
+const isObserver = computed(() => {
+  return store.player?.is_observer;
+});
+
+const isProposer = computed(() => {
+  // If show answers is false or not in revelation, we don't return player_id in currentMusic.
+  // But wait! If this music was proposed by the player, the player knows it.
+  // Wait, does the player's own local state store their submitted musics?
+  // No, but we can verify if the voter is the proposer by matching the voter ID with the music's proposer ID.
+  // Wait, since currentMusic has no player_id during voting to prevent cheating, how does the client know if the local player is the proposer?
+  // Ah! In `GameService.js` we delete `currentMusic.player_id` to prevent cheating.
+  // But wait! In the DB, does the music belong to the voter?
+  // Yes! The player knows their own music. But how does the Vue code know?
+  // Wait! In `GameService.js`, when returning the state:
+  // "un joueur ne peut PAS voter s'il a proposé la musique."
+  // If the voter tries to submit a vote for their own music, the API will return a 400 error!
+  // To avoid displaying voter options if they proposed it, how can the client detect it?
+  // Ah! If `store.musics` (which contains the player's own uploaded musics) has a music with the same preview URL or title/artist as the `currentMusic`, then they proposed it!
+  // Oh, that is extremely clever! Since `store.musics` contains the list of all musics uploaded by the current player, we can just check if any of them matches!
+  if (!store.currentMusic) return false;
+  return store.musics.some(m => m.file_path === store.currentMusic.file_path || (m.title === store.currentMusic.title && m.artist === store.currentMusic.artist));
+});
+
+const eligiblePlayers = computed(() => {
+  if (!store.players) return [];
+  // Return all active players except themselves
+  return store.players.filter(p => !p.is_observer && p.id !== store.player?.id);
+});
+
+const proposerName = computed(() => {
+  if (!store.currentMusic || !store.currentMusic.player_id) return 'Inconnu';
+  const player = store.players.find(p => p.id === store.currentMusic.player_id);
+  return player ? player.name : 'Inconnu';
+});
+
+const getPlayerName = (id) => {
+  const p = store.players.find(player => player.id === id);
+  return p ? p.name : 'Inconnu';
+};
+
+const getVoteCountForPlayer = (playerId) => {
+  if (status.value === 'voting' && store.votes) {
+    return store.votes[playerId] || 0;
+  }
+  return 0;
+};
+
+const formatAudioUrl = (path) => {
+  if (!path) return '';
+  if (path.startsWith('http')) return path;
+  const apiBase = import.meta.env.VITE_API_URL || '';
+  return `${apiBase}${path}`;
+};
+
+const updateVolume = () => {
+  if (audio) {
+    audio.volume = volume.value;
+  }
+  localStorage.setItem('harmonix_volume', String(volume.value));
+};
+
+const startAudio = () => {
+  if (audio) {
+    audio.pause();
+  }
+  
+  if (store.currentMusic?.file_path) {
+    const url = formatAudioUrl(store.currentMusic.file_path);
+    audio = new Audio(url);
+    audio.volume = volume.value;
+    
+    if (status.value === 'listening') {
+      audio.play().catch(err => {
+        console.warn("Autoplay was blocked or audio failed:", err);
+      });
+    }
+  }
+};
+
+const castVote = async (targetId) => {
+  if (isObserver.value || isProposer.value || status.value !== 'voting') return;
+  
+  try {
+    selectedVoteId.value = targetId;
+    await store.submitVote(store.currentMusic.id, targetId);
+  } catch (err) {
+    console.error("Failed to submit vote:", err);
+  }
+};
+
+const updateTimer = () => {
+  if (store.session?.timer_ends_at) {
+    const end = new Date(store.session.timer_ends_at).getTime();
+    const diff = Math.max(0, Math.round((end - Date.now()) / 1000));
+    remainingTime.value = diff;
+  } else {
+    remainingTime.value = 0;
+  }
+};
+
+onMounted(async () => {
+  if (!store.player) {
+    router.push(`/game/${route.params.code}`);
     return;
   }
+  
+  await store.loadSession(route.params.code);
+  store.connectSocket(route.params.code);
+  
+  updateTimer();
+  timerInterval = setInterval(updateTimer, 1000);
 
-  await apiService.submitVote(route.params.code, {
-    voterId: store.player.id,
-    musicId,
-    guessedPlayerId,
-  });
-};
+  // Play audio immediately if we are in listening subphase
+  startAudio();
+});
+
+onUnmounted(() => {
+  if (timerInterval) clearInterval(timerInterval);
+  if (audio) {
+    audio.pause();
+  }
+});
+
+// Watch current music to reload audio
+watch(() => store.currentMusic?.id, () => {
+  selectedVoteId.value = null; // reset vote selection for next track
+  startAudio();
+});
+
+// Watch voting status
+watch(() => status.value, (newStatus) => {
+  if (newStatus === 'listening') {
+    if (audio) {
+      audio.currentTime = 0;
+      audio.play().catch(e => console.warn(e));
+    } else {
+      startAudio();
+    }
+  } else {
+    // Stop audio on voting or revelation
+    if (audio) {
+      audio.pause();
+    }
+  }
+});
+
+// Watch phase change to redirect to results
+watch(() => store.session?.phase, (newPhase) => {
+  if (newPhase === 'results') {
+    router.push(`/game/${route.params.code}/results`);
+  } else if (newPhase === 'selection') {
+    router.push(`/game/${route.params.code}/selection`);
+  }
+});
 </script>
