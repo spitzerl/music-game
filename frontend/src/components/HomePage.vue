@@ -20,7 +20,7 @@
       <!-- Action Cards Grid -->
       <div class="grid md:grid-cols-2 gap-8">
         <!-- Create Room Card -->
-        <div class="glass-panel p-8 rounded-2xl shadow-xl flex flex-col justify-between hover:border-slate-600 transition-all duration-300">
+        <div class="glass-panel p-8 rounded-2xl shadow-xl flex flex-col justify-between hover:border-cyan-500/40 hover:scale-[1.02] hover:shadow-2xl hover:shadow-cyan-500/5 transition-all duration-300 opacity-0 animate-fade-in-up">
           <div>
             <div class="w-12 h-12 rounded-lg bg-cyan-500/10 flex items-center justify-center text-cyan-400 mb-6 border border-cyan-500/20">
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-6 h-6">
@@ -45,7 +45,7 @@
         </div>
 
         <!-- Join Room Card -->
-        <div class="glass-panel p-8 rounded-2xl shadow-xl flex flex-col justify-between hover:border-slate-600 transition-all duration-300">
+        <div class="glass-panel p-8 rounded-2xl shadow-xl flex flex-col justify-between hover:border-purple-500/40 hover:scale-[1.02] hover:shadow-2xl hover:shadow-purple-500/5 transition-all duration-300 opacity-0 animate-fade-in-up" style="animation-delay: 0.15s;">
           <div>
             <div class="w-12 h-12 rounded-lg bg-purple-500/10 flex items-center justify-center text-purple-400 mb-6 border border-purple-500/20">
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-6 h-6">
