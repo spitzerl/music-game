@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   postgres:
     image: postgres:16-alpine
@@ -32,45 +30,42 @@ services:
       - redis
     networks:
       - internal-network
-      - traefik-network # Le backend doit aussi être dans le réseau Traefik
+      - traefik-network # Connecté au réseau de Traefik
     labels:
       - "traefik.enable=true"
-      # Règle : Si l'URL commence par /api ou /socket.io, on envoie vers le Backend
       - "traefik.http.routers.musicgame-backend.rule=Host(`devine-beat.lucasspitzer.fr`) && (PathPrefix(`/api`) || PathPrefix(`/socket.io`))"
       - "traefik.http.routers.musicgame-backend.entrypoints=websecure"
       - "traefik.http.routers.musicgame-backend.tls=true"
       - "traefik.http.routers.musicgame-backend.tls.certresolver=letsencrypt"
-      # Port interne du backend (défini dans l'environnement au-dessus)
       - "traefik.http.services.musicgame-backend.loadbalancer.server.port=3001"
 
   frontend:
     build:
       context: ./frontend
       args:
-        # Le front appelle le même domaine, Traefik fera le tri grâce aux règles ci-dessus
         VITE_API_URL: https://devine-beat.lucasspitzer.fr/api
         VITE_SOCKET_URL: https://devine-beat.lucasspitzer.fr
     depends_on:
       - backend
     networks:
       - internal-network
-      - traefik-network
+      - traefik-network # Connecté au réseau de Traefik
     labels:
       - "traefik.enable=true"
-      # Règle : Tout le reste du trafic va sur le Frontend
       - "traefik.http.routers.musicgame-frontend.rule=Host(`devine-beat.lucasspitzer.fr`)"
       - "traefik.http.routers.musicgame-frontend.entrypoints=websecure"
       - "traefik.http.routers.musicgame-frontend.tls=true"
       - "traefik.http.routers.musicgame-frontend.tls.certresolver=letsencrypt"
-      # Port interne du Frontend (80 si c'est un build de prod statique standard, sinon adaptez selon son Dockerfile)
       - "traefik.http.services.musicgame-frontend.loadbalancer.server.port=80"
 
 volumes:
   postgres_data:
 
 networks:
+  # Réseau interne isolé pour l'application
   internal-network:
     driver: bridge
+  # Liaison avec votre réseau Traefik existant nommé "proxy"
   traefik-network:
     external: true
     name: proxy
