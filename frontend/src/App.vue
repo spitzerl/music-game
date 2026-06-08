@@ -24,12 +24,16 @@
       </TransitionGroup>
     </div>
 
+    <!-- Pause Menu (Only when in game) -->
+    <PauseMenu />
+
     <router-view />
   </main>
 </template>
 
 <script setup>
 import { useGameStore } from './stores/gameStore';
+import PauseMenu from './components/PauseMenu.vue';
 import { h } from 'vue';
 
 const store = useGameStore();

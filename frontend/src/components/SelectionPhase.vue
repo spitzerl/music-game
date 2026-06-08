@@ -275,6 +275,8 @@ watch(() => store.session?.phase, (newPhase) => {
     router.push(`/game/${route.params.code}/voting`);
   } else if (newPhase === 'results') {
     router.push(`/game/${route.params.code}/results`);
+  } else if (newPhase === 'waiting') {
+    router.push(`/game/${route.params.code}`);
   }
 });
 
