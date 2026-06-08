@@ -4,13 +4,12 @@
     <button
       v-if="!isOpen"
       @click="openMenu"
-      class="fixed top-4 right-4 z-40 pointer-events-auto flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-slate-900/60 hover:bg-slate-900/80 border border-slate-700/50 backdrop-blur-md text-slate-200 hover:text-white font-bold text-xs shadow-lg transition-all active:scale-95 hover:border-cyan-500/40"
+      class="fixed bottom-6 right-6 z-40 pointer-events-auto flex items-center justify-center w-12 h-12 rounded-full bg-slate-900/60 hover:bg-slate-900/80 border border-slate-700/50 backdrop-blur-md text-slate-200 hover:text-white shadow-lg transition-all active:scale-95 hover:border-cyan-500/40 group"
       aria-label="Ouvrir le menu de pause"
     >
-      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-4 h-4">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-5 h-5 transition-transform group-hover:scale-110">
         <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 5.25v13.5m-7.5-13.5v13.5" />
       </svg>
-      <span>Pause</span>
     </button>
 
     <!-- Pause Menu Overlay -->
