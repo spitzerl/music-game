@@ -9,7 +9,7 @@
       <div class="text-center mb-12 animate-float">
         <h1 class="text-6xl font-extrabold tracking-tight mb-3">
           <span class="bg-gradient-to-r from-cyan-400 via-teal-300 to-purple-500 bg-clip-text text-transparent">
-            Harmonix
+            Devine Beat
           </span>
         </h1>
         <p class="text-lg text-slate-400 font-medium max-w-md mx-auto">
