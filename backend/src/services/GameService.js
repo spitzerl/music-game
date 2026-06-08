@@ -590,6 +590,9 @@ export default class GameService {
         musicCounts[p.id] = rawMusics.filter(m => m.player_id === p.id).length;
       });
 
+      const parsedPlayerId = playerId ? Number.parseInt(playerId, 10) : null;
+      const playerSelf = parsedPlayerId ? computedPlayers.find(p => p.id === parsedPlayerId) || null : null;
+
       if (playerId) {
         const targetId = Number.parseInt(playerId, 10);
         filteredMusics = rawMusics.filter(m => m.player_id === targetId);
@@ -599,7 +602,8 @@ export default class GameService {
         session,
         players: computedPlayers,
         musics: filteredMusics,
-        musicCounts
+        musicCounts,
+        player: playerSelf
       };
     } else if (session.phase === 'voting') {
       // Return only the current music, play order
@@ -649,10 +653,14 @@ export default class GameService {
       };
     }
 
+    // waiting phase
+    const parsedPlayerIdWaiting = playerId ? Number.parseInt(playerId, 10) : null;
+    const playerSelfWaiting = parsedPlayerIdWaiting ? computedPlayers.find(p => p.id === parsedPlayerIdWaiting) || null : null;
     return {
       session,
       players: computedPlayers,
-      musics: rawMusics
+      musics: rawMusics,
+      player: playerSelfWaiting
     };
   }
 

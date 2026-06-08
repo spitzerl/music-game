@@ -38,6 +38,11 @@ export const useGameStore = defineStore('game', {
       this.currentMusic = data.currentMusic || null;
       this.votes = data.votes || null;
       this.musicCounts = data.musicCounts || null;
+      // Sync the current player object from the server (keeps id/session_id accurate after refresh)
+      if (data.player) {
+        this.player = data.player;
+        localStorage.setItem('music_game_player', JSON.stringify(data.player));
+      }
       return data;
     },
     async updateConfig(config) {
