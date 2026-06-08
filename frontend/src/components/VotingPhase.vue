@@ -4,7 +4,7 @@
     <header class="flex justify-between items-center mb-6 pb-4 border-b border-slate-800">
       <div>
         <h1 class="text-3xl font-extrabold text-white flex items-center gap-2">
-          <span>Phase de Vote</span>
+          <span>{{ status === 'revelation' ? 'Révélation' : 'Phase de Vote' }}</span>
         </h1>
         <p class="text-slate-400 text-sm">
           Morceau <span class="text-cyan-400 font-bold font-mono">{{ (store.session?.current_music_index || 0) + 1 }}</span>
@@ -98,33 +98,32 @@
         </div>
 
         <!-- Revelation Phase -->
-        <div v-else-if="status === 'revelation'" class="space-y-6 w-full">
-          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-xs font-bold uppercase tracking-wider">
-            Révélation
-          </div>
-          <h2 class="text-xl font-bold text-slate-400">Le morceau a été proposé par</h2>
-          
-          <!-- Proposer reveal badge -->
-          <div class="inline-block bg-gradient-to-r from-yellow-500/20 to-amber-500/20 border border-yellow-500/30 px-8 py-4 rounded-3xl shadow-xl animate-float">
-            <p class="text-4xl font-extrabold text-yellow-400 tracking-tight">{{ proposerName }}</p>
-          </div>
-
-          <div class="bg-slate-900/60 border border-slate-800 p-4 rounded-2xl max-w-sm mx-auto flex items-center gap-3 text-left">
-            <img v-if="store.currentMusic?.cover_url" :src="store.currentMusic.cover_url" class="w-12 h-12 rounded-xl object-cover shadow border border-slate-800/80 flex-shrink-0" />
-            <div v-else class="w-12 h-12 rounded-xl bg-gradient-to-tr from-cyan-500 to-purple-600 flex items-center justify-center text-white shadow flex-shrink-0">
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M9 9l10.5-3m0 0L21 8.25M19.5 6C19 6 13 12 13 12v6.75m0 0a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
-              </svg>
+        <div v-else-if="status === 'revelation'" class="w-full py-4 flex flex-col items-center">
+          <div class="bg-slate-900/40 border border-slate-800/80 rounded-3xl p-6 md:p-8 max-w-sm w-full shadow-2xl flex flex-col items-center text-center">
+            <!-- Large cover art -->
+            <div class="relative group mb-5">
+              <img v-if="store.currentMusic?.cover_url" :src="store.currentMusic.cover_url" class="w-44 h-44 rounded-2xl object-cover shadow-2xl border border-slate-800 transition-transform duration-500 group-hover:scale-105" />
+              <div v-else class="w-44 h-44 rounded-2xl bg-gradient-to-tr from-cyan-500 to-purple-600 flex items-center justify-center text-white shadow-2xl border border-slate-800">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-16 h-16 opacity-80">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M9 9l10.5-3m0 0L21 8.25M19.5 6C19 6 13 12 13 12v6.75m0 0a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+                </svg>
+              </div>
             </div>
-            <div class="min-w-0">
-              <p class="text-sm font-semibold text-white truncate">{{ store.currentMusic?.title }}</p>
-              <p class="text-xs text-slate-400 truncate">{{ store.currentMusic?.artist }}</p>
+
+            <!-- Song info -->
+            <h3 class="text-xl font-extrabold text-white leading-snug truncate max-w-full">{{ store.currentMusic?.title }}</h3>
+            <p class="text-sm text-slate-400 font-medium truncate max-w-full mt-1 mb-6">{{ store.currentMusic?.artist }}</p>
+
+            <!-- Proposer -->
+            <div class="w-full bg-gradient-to-r from-yellow-500/10 to-amber-500/10 border border-yellow-500/20 py-3 px-5 rounded-2xl flex flex-col items-center justify-center gap-0.5">
+              <span class="text-[10px] text-yellow-500/70 uppercase font-black tracking-widest">Proposé par</span>
+              <span class="text-xl font-black text-yellow-400 tracking-wide">{{ proposerName }}</span>
             </div>
           </div>
 
           <!-- Host: advance to next round -->
-          <div v-if="isHost" class="pt-2">
-            <button @click="advanceFromRevelation" class="glow-btn-purple bg-purple-600 hover:bg-purple-500 text-white font-bold py-3 px-6 rounded-xl transition-all flex items-center gap-2 mx-auto">
+          <div v-if="isHost" class="mt-6">
+            <button @click="advanceFromRevelation" class="glow-btn-purple bg-purple-600 hover:bg-purple-500 text-white font-extrabold py-3.5 px-8 rounded-2xl transition-all flex items-center gap-2.5 text-base shadow-lg active:scale-98">
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-5 h-5">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M3 8.689c0-.864.933-1.406 1.683-.977l7.108 4.061a1.125 1.125 0 0 1 0 1.954l-7.108 4.061A1.125 1.125 0 0 1 3 16.811V8.69ZM12.75 8.689c0-.864.933-1.406 1.683-.977l7.108 4.061a1.125 1.125 0 0 1 0 1.954l-7.108 4.061a1.125 1.125 0 0 1-1.683-.977V8.69Z" />
               </svg>
