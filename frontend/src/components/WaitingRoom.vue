@@ -71,77 +71,137 @@
           <!-- Max Musics per Player -->
           <div>
             <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Musiques par joueur</label>
-            <select v-model="config.maxMusicsPerPlayer" :disabled="!isHost" @change="saveConfig" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-cyan-500 disabled:opacity-60 disabled:cursor-not-allowed">
-              <option :value="1">1 musique</option>
-              <option :value="2">2 musiques</option>
-              <option :value="3">3 musiques</option>
-              <option :value="5">5 musiques</option>
-            </select>
+            <div class="bg-slate-950/60 p-1.5 rounded-2xl border border-slate-800/80 flex gap-1.5 shadow-inner">
+              <button 
+                v-for="val in [1, 2, 3, 5]" 
+                :key="val" 
+                @click="isHost && (config.maxMusicsPerPlayer = val) && saveConfig()"
+                :disabled="!isHost"
+                type="button"
+                :class="['flex-1 py-2 rounded-xl text-xs font-extrabold transition-all duration-200 active:scale-95 disabled:opacity-60 disabled:cursor-not-allowed', config.maxMusicsPerPlayer === val ? 'bg-cyan-500 text-slate-950 shadow-md font-black' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-900/30']"
+              >
+                {{ val }}
+              </button>
+            </div>
           </div>
 
           <!-- Selection Duration -->
           <div>
             <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Durée de sélection</label>
-            <select v-model="config.selectionDuration" :disabled="!isHost" @change="saveConfig" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-cyan-500 disabled:opacity-60 disabled:cursor-not-allowed">
-              <option :value="15">15 secondes</option>
-              <option :value="30">30 secondes</option>
-              <option :value="60">60 secondes (1 min)</option>
-              <option :value="120">120 secondes (2 min)</option>
-              <option :value="180">180 secondes (3 min)</option>
-            </select>
+            <div class="bg-slate-950/60 p-1.5 rounded-2xl border border-slate-800/80 flex gap-1.5 shadow-inner flex-wrap">
+              <button 
+                v-for="opt in [{ v: 15, l: '15s' }, { v: 30, l: '30s' }, { v: 60, l: '1m' }, { v: 120, l: '2m' }, { v: 180, l: '3m' }]" 
+                :key="opt.v" 
+                @click="isHost && (config.selectionDuration = opt.v) && saveConfig()"
+                :disabled="!isHost"
+                type="button"
+                :class="['flex-1 min-w-[45px] py-2 rounded-xl text-xs font-extrabold transition-all duration-200 active:scale-95 disabled:opacity-60 disabled:cursor-not-allowed', config.selectionDuration === opt.v ? 'bg-cyan-500 text-slate-950 shadow-md font-black' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-900/30']"
+              >
+                {{ opt.l }}
+              </button>
+            </div>
           </div>
 
           <!-- Extract Duration -->
           <div>
             <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Durée d'extrait</label>
-            <select v-model="config.extractDuration" :disabled="!isHost" @change="saveConfig" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-cyan-500 disabled:opacity-60 disabled:cursor-not-allowed">
-              <option :value="10">10 secondes</option>
-              <option :value="15">15 secondes</option>
-              <option :value="20">20 secondes</option>
-              <option :value="30">30 secondes</option>
-            </select>
+            <div class="bg-slate-950/60 p-1.5 rounded-2xl border border-slate-800/80 flex gap-1.5 shadow-inner">
+              <button 
+                v-for="val in [10, 15, 20, 30]" 
+                :key="val" 
+                @click="isHost && (config.extractDuration = val) && saveConfig()"
+                :disabled="!isHost"
+                type="button"
+                :class="['flex-1 py-2 rounded-xl text-xs font-extrabold transition-all duration-200 active:scale-95 disabled:opacity-60 disabled:cursor-not-allowed', config.extractDuration === val ? 'bg-cyan-500 text-slate-950 shadow-md font-black' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-900/30']"
+              >
+                {{ val }}s
+              </button>
+            </div>
           </div>
 
           <!-- Voting Duration -->
           <div>
             <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Temps de vote</label>
-            <select v-model="config.votingDuration" :disabled="!isHost" @change="saveConfig" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-cyan-500 disabled:opacity-60 disabled:cursor-not-allowed">
-              <option :value="5">5 secondes</option>
-              <option :value="10">10 secondes</option>
-              <option :value="15">15 secondes</option>
-              <option :value="20">20 secondes</option>
-              <option :value="30">30 secondes</option>
-              <option :value="45">45 secondes</option>
-            </select>
+            <div class="bg-slate-950/60 p-1.5 rounded-2xl border border-slate-800/80 flex gap-1.5 shadow-inner flex-wrap">
+              <button 
+                v-for="val in [5, 10, 15, 20, 30, 45]" 
+                :key="val" 
+                @click="isHost && (config.votingDuration = val) && saveConfig()"
+                :disabled="!isHost"
+                type="button"
+                :class="['flex-1 min-w-[35px] py-2 rounded-xl text-xs font-extrabold transition-all duration-200 active:scale-95 disabled:opacity-60 disabled:cursor-not-allowed', config.votingDuration === val ? 'bg-cyan-500 text-slate-950 shadow-md font-black' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-900/30']"
+              >
+                {{ val }}s
+              </button>
+            </div>
           </div>
 
           <!-- Show Answers -->
-          <div class="flex items-center justify-between py-2 border-y border-slate-800">
-            <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Révéler les réponses</span>
-            <input type="checkbox" v-model="config.showAnswers" :disabled="!isHost" @change="saveConfig" class="w-5 h-5 rounded border-slate-700 bg-slate-900 text-cyan-500 focus:ring-cyan-500 disabled:opacity-60 disabled:cursor-not-allowed" />
+          <div class="flex items-center justify-between py-2 border-y border-slate-800/80">
+            <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider pr-4">Révéler les réponses</span>
+            <label class="switch-container">
+              <input 
+                type="checkbox" 
+                v-model="config.showAnswers" 
+                :disabled="!isHost" 
+                @change="saveConfig" 
+                class="switch-input" 
+              />
+              <span class="switch-track">
+                <span class="switch-thumb"></span>
+              </span>
+            </label>
           </div>
 
           <!-- Auto Advance -->
-          <div class="flex items-center justify-between py-2 border-b border-slate-800">
-            <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Enchaîner les manches</span>
-            <input type="checkbox" v-model="config.autoAdvance" :disabled="!isHost" @change="saveConfig" class="w-5 h-5 rounded border-slate-700 bg-slate-900 text-cyan-500 focus:ring-cyan-500 disabled:opacity-60 disabled:cursor-not-allowed" />
+          <div class="flex items-center justify-between py-2 border-b border-slate-800/80">
+            <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider pr-4">Enchaîner les manches</span>
+            <label class="switch-container">
+              <input 
+                type="checkbox" 
+                v-model="config.autoAdvance" 
+                :disabled="!isHost" 
+                @change="saveConfig" 
+                class="switch-input" 
+              />
+              <span class="switch-track">
+                <span class="switch-thumb"></span>
+              </span>
+            </label>
           </div>
 
           <!-- Show Vote Count -->
-          <div class="flex items-center justify-between py-2 border-b border-slate-800">
-            <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Afficher le nombre de votes par suspect</span>
-            <input type="checkbox" v-model="config.showVoteCount" :disabled="!isHost" @change="saveConfig" class="w-5 h-5 rounded border-slate-700 bg-slate-900 text-cyan-500 focus:ring-cyan-500 disabled:opacity-60 disabled:cursor-not-allowed" />
+          <div class="flex items-center justify-between py-2 border-b border-slate-800/80">
+            <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider pr-4">Afficher le nombre de votes</span>
+            <label class="switch-container">
+              <input 
+                type="checkbox" 
+                v-model="config.showVoteCount" 
+                :disabled="!isHost" 
+                @change="saveConfig" 
+                class="switch-input" 
+              />
+              <span class="switch-track">
+                <span class="switch-thumb"></span>
+              </span>
+            </label>
           </div>
 
           <!-- Max Players -->
           <div>
             <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Limite de joueurs</label>
-            <select v-model="config.maxPlayers" :disabled="!isHost" @change="saveConfig" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-cyan-500 disabled:opacity-60 disabled:cursor-not-allowed">
-              <option :value="4">4 joueurs max</option>
-              <option :value="8">8 joueurs max</option>
-              <option :value="12">12 joueurs max</option>
-              <option :value="16">16 joueurs max</option>
-            </select>
+            <div class="bg-slate-950/60 p-1.5 rounded-2xl border border-slate-800/80 flex gap-1.5 shadow-inner">
+              <button 
+                v-for="val in [4, 8, 12, 16]" 
+                :key="val" 
+                @click="isHost && (config.maxPlayers = val) && saveConfig()"
+                :disabled="!isHost"
+                type="button"
+                :class="['flex-1 py-2 rounded-xl text-xs font-extrabold transition-all duration-200 active:scale-95 disabled:opacity-60 disabled:cursor-not-allowed', config.maxPlayers === val ? 'bg-cyan-500 text-slate-950 shadow-md font-black' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-900/30']"
+              >
+                {{ val }}
+              </button>
+            </div>
           </div>
           
           <p v-if="!isHost" class="text-center text-xs text-slate-500 mt-4 italic">
