@@ -295,8 +295,10 @@ const isProposer = computed(() => {
 
 const eligiblePlayers = computed(() => {
   if (!store.players) return [];
-  // Return all active players except themselves
-  return store.players.filter(p => !p.is_observer && p.id !== store.player?.id);
+  // Return all active players except themselves, sorted alphabetically
+  return store.players
+    .filter(p => !p.is_observer && p.id !== store.player?.id)
+    .sort((a, b) => a.name.localeCompare(b.name, 'fr', { sensitivity: 'base' }));
 });
 
 const proposerName = computed(() => {
