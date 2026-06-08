@@ -250,6 +250,16 @@ const updateTimer = () => {
   }
 };
 
+const handleKeyDown = (e) => {
+  if (e.code === 'Space' && isHost.value) {
+    const isTyping = ['INPUT', 'TEXTAREA'].includes(document.activeElement?.tagName);
+    if (!isTyping) {
+      e.preventDefault();
+      forceStartVoting();
+    }
+  }
+};
+
 onMounted(async () => {
   if (!store.player) {
     router.push(`/game/${route.params.code}`);
@@ -260,6 +270,7 @@ onMounted(async () => {
   
   updateTimer();
   timerInterval = setInterval(updateTimer, 1000);
+  window.addEventListener('keydown', handleKeyDown);
 });
 
 onUnmounted(() => {
@@ -267,6 +278,7 @@ onUnmounted(() => {
   if (audioObject) {
     audioObject.pause();
   }
+  window.removeEventListener('keydown', handleKeyDown);
 });
 
 // Watch for phase changes to redirect

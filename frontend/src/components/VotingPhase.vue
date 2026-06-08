@@ -13,6 +13,18 @@
 
       <!-- Header Action Controls -->
       <div class="flex items-center gap-3">
+        <!-- Host Skip/Next Subphase Button -->
+        <button
+          v-if="isHost && status === 'voting'"
+          @click="advanceSubphase"
+          :class="['px-4 py-2 border text-sm font-bold rounded-xl transition-all flex items-center gap-2 shadow-lg active:scale-95', everyoneHasVoted ? 'bg-emerald-600 hover:bg-emerald-500 border-emerald-500 text-white animate-pulse' : 'bg-slate-800 hover:bg-slate-700 border-slate-700 text-slate-200']"
+        >
+          <span>Révéler ({{ totalVotesCast }}/{{ totalEligibleVoters }})</span>
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-4 h-4">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M11.25 4.5l7.5 7.5-7.5 7.5m-6-15l7.5 7.5-7.5 7.5" />
+          </svg>
+        </button>
+
         <!-- Host Manage Players Button -->
         <button v-if="isHost" @click="showPlayersModal = true" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 text-sm font-bold rounded-xl transition-all flex items-center gap-2">
           ⚙️ Gérer les joueurs
@@ -300,6 +312,53 @@ const advanceFromRevelation = async () => {
   }
 };
 
+const advanceSubphase = async () => {
+  if (!isHost.value) return;
+  try {
+    await store.advanceRound();
+  } catch (err) {
+    console.error("Failed to advance subphase:", err);
+  }
+};
+
+const totalVotesCast = computed(() => {
+  if (!store.votes) return 0;
+  return Object.values(store.votes).reduce((sum, count) => sum + count, 0);
+});
+
+const totalEligibleVoters = computed(() => {
+  if (!store.players) return 0;
+  return store.players.filter(p => !p.is_observer && p.is_connected).length;
+});
+
+const everyoneHasVoted = computed(() => {
+  const voters = totalEligibleVoters.value;
+  return voters > 0 && totalVotesCast.value >= voters;
+});
+
+const handleSpaceAdvance = async () => {
+  if (!isHost.value) return;
+  try {
+    if (status.value === 'idle') {
+      await store.startRound();
+    } else {
+      await store.advanceRound();
+    }
+  } catch (err) {
+    console.error("Failed to advance phase via keyboard:", err);
+  }
+};
+
+const handleKeyDown = (e) => {
+  if (e.code === 'Space' && isHost.value) {
+    const isTyping = ['INPUT', 'TEXTAREA'].includes(document.activeElement?.tagName);
+    if (!isTyping) {
+      e.preventDefault();
+      handleSpaceAdvance();
+    }
+  }
+};
+
 
 const isObserver = computed(() => {
   return store.player?.is_observer;
@@ -417,6 +476,7 @@ onMounted(async () => {
 
   // Play audio immediately if we are in listening subphase
   startAudio();
+  window.addEventListener('keydown', handleKeyDown);
 });
 
 onUnmounted(() => {
@@ -424,6 +484,7 @@ onUnmounted(() => {
   if (audio) {
     audio.pause();
   }
+  window.removeEventListener('keydown', handleKeyDown);
 });
 
 // Watch current music to reload audio

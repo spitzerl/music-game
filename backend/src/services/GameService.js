@@ -400,19 +400,33 @@ export default class GameService {
     if (!session) {
       throw new Error('Session introuvable');
     }
-    if (session.phase !== 'voting' || session.voting_status !== 'revelation') {
-      throw new Error('Impossible d\'avancer depuis ce statut (révélation attendue)');
+    if (session.phase !== 'voting') {
+      throw new Error('La phase de vote n\'est pas active');
     }
-    this.clearTimer(code);
-    
-    const musics = await Music.findBySession(session.id);
-    const activeMusics = musics.filter(m => m.play_order >= 0);
-    const nextIndex = session.current_music_index + 1;
 
-    if (nextIndex < activeMusics.length) {
-      await this.enterVotingSubphase(code, nextIndex, 'listening');
-    } else {
-      await this.finishSession(code);
+    const status = session.voting_status;
+    const musicIndex = session.current_music_index;
+
+    this.clearTimer(code);
+
+    if (status === 'listening') {
+      await this.enterVotingSubphase(code, musicIndex, 'voting');
+    } else if (status === 'voting') {
+      if (session.show_answers) {
+        await this.enterVotingSubphase(code, musicIndex, 'revelation');
+      } else {
+        await this.nextRound(code, musicIndex);
+      }
+    } else if (status === 'revelation') {
+      const musics = await Music.findBySession(session.id);
+      const activeMusics = musics.filter(m => m.play_order >= 0);
+      const nextIndex = musicIndex + 1;
+
+      if (nextIndex < activeMusics.length) {
+        await this.enterVotingSubphase(code, nextIndex, 'listening');
+      } else {
+        await this.finishSession(code);
+      }
     }
     return this.getState(code);
   }

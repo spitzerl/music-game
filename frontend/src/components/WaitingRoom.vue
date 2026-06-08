@@ -303,7 +303,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, reactive, watch } from 'vue';
+import { ref, computed, onMounted, onUnmounted, reactive, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useGameStore } from '../stores/gameStore';
 
@@ -366,17 +366,32 @@ const loadAndSyncConfig = async () => {
   }
 };
 
+const handleKeyDown = (e) => {
+  if (e.code === 'Space' && isHost.value) {
+    const isTyping = ['INPUT', 'TEXTAREA'].includes(document.activeElement?.tagName);
+    if (!isTyping) {
+      e.preventDefault();
+      startSelection();
+    }
+  }
+};
+
 onMounted(async () => {
   try {
     await loadAndSyncConfig();
     if (store.player && store.player.session_id === store.session?.id) {
       store.connectSocket(route.params.code);
     }
+    window.addEventListener('keydown', handleKeyDown);
   } catch (err) {
     console.error("Failed to load waiting room session:", err);
   } finally {
     isLoading.value = false;
   }
+});
+
+onUnmounted(() => {
+  window.removeEventListener('keydown', handleKeyDown);
 });
 
 // Watch for changes in session from socket to keep config updated for non-hosts

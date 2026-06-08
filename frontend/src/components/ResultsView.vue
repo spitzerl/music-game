@@ -161,7 +161,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, watch } from 'vue';
+import { ref, computed, onMounted, onUnmounted, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useGameStore } from '../stores/gameStore';
 
@@ -183,6 +183,16 @@ const getPlayerName = (id) => {
   return p ? p.name : 'Inconnu';
 };
 
+const handleKeyDown = (e) => {
+  if (e.code === 'Space' && isHost.value) {
+    const isTyping = ['INPUT', 'TEXTAREA'].includes(document.activeElement?.tagName);
+    if (!isTyping) {
+      e.preventDefault();
+      replay();
+    }
+  }
+};
+
 onMounted(async () => {
   if (!store.player) {
     router.push(`/game/${route.params.code}`);
@@ -190,6 +200,11 @@ onMounted(async () => {
   }
   await store.loadResults(route.params.code);
   store.connectSocket(route.params.code);
+  window.addEventListener('keydown', handleKeyDown);
+});
+
+onUnmounted(() => {
+  window.removeEventListener('keydown', handleKeyDown);
 });
 
 // Watch for phase changes to redirect back to waiting room when session is reset
