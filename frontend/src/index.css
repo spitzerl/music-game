@@ -207,3 +207,39 @@ h1, h2, h3, h4, h5, h6 {
   background-color: #020617; /* slate-950 */
 }
 
+/* New custom animations for landing page */
+@keyframes spin-slow {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.animate-spin-slow {
+  animation: spin-slow 12s linear infinite;
+}
+
+@keyframes float-note {
+  0% {
+    transform: translateY(105vh) translateX(0) scale(0.6) rotate(0deg);
+    opacity: 0;
+  }
+  10% {
+    opacity: 0.2;
+  }
+  90% {
+    opacity: 0.2;
+  }
+  100% {
+    transform: translateY(-10vh) translateX(40px) scale(1.1) rotate(360deg);
+    opacity: 0;
+  }
+}
+
+.floating-item {
+  position: absolute;
+  bottom: -50px;
+  pointer-events: none;
+  animation: float-note 15s linear infinite;
+  will-change: transform, opacity;
+}
+
+
