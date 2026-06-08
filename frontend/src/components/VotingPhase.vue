@@ -1,5 +1,5 @@
 <template>
-  <div class="min-h-screen p-6 max-w-5xl mx-auto flex flex-col justify-between">
+  <div class="min-h-screen p-6 max-w-5xl mx-auto flex flex-col justify-between opacity-0 animate-fade-in-up">
     <!-- Header -->
     <header class="flex justify-between items-center mb-6 pb-4 border-b border-slate-800">
       <div>
@@ -61,13 +61,13 @@
 
         <!-- Listening Phase -->
         <div v-else-if="status === 'listening'" class="space-y-6">
-          <!-- Animated soundwave -->
-          <div class="flex items-end justify-center gap-1.5 h-16 mb-4">
-            <span class="w-2 bg-cyan-400 rounded-full animate-bounce" style="animation-duration: 0.6s;"></span>
-            <span class="w-2 bg-cyan-500 rounded-full animate-bounce h-12" style="animation-duration: 0.4s;"></span>
-            <span class="w-2 bg-purple-500 rounded-full animate-bounce h-16" style="animation-duration: 0.7s;"></span>
-            <span class="w-2 bg-purple-600 rounded-full animate-bounce h-8" style="animation-duration: 0.5s;"></span>
-            <span class="w-2 bg-cyan-400 rounded-full animate-bounce h-14" style="animation-duration: 0.8s;"></span>
+          <!-- Animated soundwave (Equalizer) -->
+          <div class="flex items-end justify-center gap-2 h-16 mb-4 w-40 mx-auto px-4 py-2 bg-slate-900/60 rounded-2xl border border-slate-800/40">
+            <span class="w-2 bg-cyan-400 rounded-full animate-eq-1" style="height: 20%;"></span>
+            <span class="w-2 bg-cyan-500 rounded-full animate-eq-2" style="height: 40%;"></span>
+            <span class="w-2 bg-purple-500 rounded-full animate-eq-3" style="height: 15%;"></span>
+            <span class="w-2 bg-purple-600 rounded-full animate-eq-4" style="height: 35%;"></span>
+            <span class="w-2 bg-cyan-400 rounded-full animate-eq-5" style="height: 25%;"></span>
           </div>
           <h2 class="text-2xl font-extrabold text-white">Écoute en cours...</h2>
           <p class="text-slate-400 text-sm max-w-md mx-auto">
@@ -154,20 +154,24 @@
           <!-- Voter Buttons Grid -->
           <div v-if="!isObserver" class="space-y-3">
             <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Sélectionnez le suspect :</p>
-            <div class="grid sm:grid-cols-2 gap-4">
+            <TransitionGroup
+              name="list"
+              tag="div"
+              class="grid sm:grid-cols-2 gap-4"
+            >
               <button
                 v-for="target in eligiblePlayers"
                 :key="target.id"
                 @click="castVote(target.id)"
-                :class="['p-4 rounded-xl border text-left font-bold transition-all flex justify-between items-center', selectedVoteId === target.id ? 'bg-cyan-500/10 border-cyan-500 text-white shadow-md shadow-cyan-500/10' : 'bg-slate-900/60 border-slate-800 text-slate-300 hover:border-slate-700 hover:text-white']"
+                :class="['p-5 rounded-2xl border text-left font-bold transition-all flex justify-between items-center active:scale-[0.98] hover:scale-[1.01] text-base md:text-lg min-h-[64px]', selectedVoteId === target.id ? 'bg-cyan-500/10 border-cyan-500 text-white shadow-md shadow-cyan-500/10' : 'bg-slate-900/60 border-slate-800 text-slate-300 hover:border-slate-700 hover:text-white']"
               >
-                <span>{{ target.name }}</span>
+                <span class="truncate pr-2">{{ target.name }}</span>
                 <!-- Vote Counter -->
-                <span v-if="store.session?.show_vote_count && getVoteCountForPlayer(target.id) > 0" class="w-6 h-6 flex items-center justify-center text-[11px] bg-cyan-500/20 text-cyan-400 rounded-full border border-cyan-500/30 font-bold">
+                <span v-if="store.session?.show_vote_count && getVoteCountForPlayer(target.id) > 0" class="w-6 h-6 flex-shrink-0 flex items-center justify-center text-[11px] bg-cyan-500/20 text-cyan-400 rounded-full border border-cyan-500/30 font-bold animate-pulse-glow">
                   {{ getVoteCountForPlayer(target.id) }}
                 </span>
               </button>
-            </div>
+            </TransitionGroup>
           </div>
         </div>
 
