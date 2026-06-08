@@ -566,7 +566,7 @@ export default class GameService {
     }
 
     for (const p of playerMap.values()) {
-      p.score = p.votesReceived * 1 + p.correctGuesses * 2;
+      p.score = p.correctGuesses;
     }
 
     // Sort players in the ranking list: highest score first, then order of arrival (created_at)

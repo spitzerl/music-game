@@ -177,7 +177,7 @@
                 Bluff
               </span>
               <span v-else-if="vote.guessed_player_id === store.currentMusic?.player_id" class="text-[10px] bg-emerald-500/10 text-emerald-400 px-2 py-0.5 rounded border border-emerald-500/20 font-bold uppercase">
-                ✓ Correct +2
+                ✓ Correct +1
               </span>
               <span v-else class="text-[10px] bg-rose-500/10 text-rose-400 px-2 py-0.5 rounded border border-rose-500/20 font-bold uppercase">
                 ✗ Incorrect
