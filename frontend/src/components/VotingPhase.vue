@@ -1,5 +1,5 @@
 <template>
-  <div class="min-h-screen p-6 max-w-7xl mx-auto flex flex-col justify-start gap-4 opacity-0 animate-fade-in-up">
+  <div class="min-h-screen p-6 max-w-3xl mx-auto flex flex-col justify-start gap-4 opacity-0 animate-fade-in-up">
     <!-- Header -->
     <header class="flex justify-between items-center mb-6 pb-4 border-b border-slate-800">
       <div>
@@ -41,7 +41,7 @@
     </header>
 
     <!-- Main Board -->
-    <main class="grid md:grid-cols-2 gap-8 mb-8 items-start">
+    <main class="grid gap-6 mb-8 items-start">
       <!-- Status Box -->
       <section class="glass-panel p-8 rounded-3xl border border-slate-800 text-center relative overflow-hidden flex flex-col items-center justify-center min-h-[300px]">
         <!-- Idle Phase (Configuration / Ready to start) -->
