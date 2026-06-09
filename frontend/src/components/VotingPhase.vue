@@ -199,7 +199,7 @@
         <div v-else-if="status === 'revelation'" class="space-y-4">
           <h3 class="text-lg font-bold text-white mb-4">Détail des votes</h3>
           <div class="space-y-2 max-h-[450px] overflow-y-auto pr-2">
-            <div v-for="vote in store.votes" :key="vote.id" class="flex items-center justify-between p-3 rounded-xl bg-slate-900/60 border border-slate-850">
+            <div v-for="vote in store.votes" :key="vote.id" class="flex items-center justify-between py-3.5 border-b border-slate-800/50 last:border-0 hover:bg-slate-900/10 transition-all px-2 rounded-xl">
               <div class="flex items-center gap-2">
                 <span class="font-bold text-slate-200 text-sm">{{ getPlayerName(vote.voter_id) }}</span>
                 <span class="text-xs text-slate-500">pense que c'est</span>

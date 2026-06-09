@@ -89,12 +89,12 @@
                 name="list"
                 tag="ul"
                 v-if="tracks.length"
-                class="max-h-60 overflow-y-auto space-y-2 rounded-lg border border-slate-800 bg-slate-950/40 p-2"
+                class="max-h-60 overflow-y-auto space-y-1 rounded-lg bg-slate-950/20 p-2"
               >
                 <li
                   v-for="track in tracks"
                   :key="track.id"
-                  class="flex items-center justify-between gap-3 rounded-lg bg-slate-900/50 p-2.5 border border-slate-800/40 hover:border-slate-700 transition-colors"
+                  class="flex items-center justify-between gap-3 py-2.5 border-b border-slate-800/40 last:border-0 hover:bg-slate-900/10 px-2 rounded-lg transition-all"
                 >
                   <div class="flex items-center gap-3 min-w-0">
                     <img v-if="track.cover" :src="track.cover" class="w-10 h-10 rounded object-cover" />
@@ -122,21 +122,21 @@
               </TransitionGroup>
             </form>
           </div>
-
+ 
           <div v-else class="bg-slate-900/60 border border-slate-800 p-6 rounded-xl text-center text-slate-400 italic">
             Vous avez proposé le nombre maximum de musiques ({{ store.session?.max_musics_per_player || 2 }}). Attendez la fin du chrono !
           </div>
         </div>
-
+ 
         <!-- Submitted Musics List with Delete option -->
         <div class="border-t border-slate-800 pt-6">
           <h3 class="text-lg font-bold text-white mb-4">Vos musiques soumises</h3>
           <TransitionGroup
             name="list"
             tag="div"
-            class="space-y-3"
+            class="space-y-2"
           >
-            <div v-for="music in store.musics" :key="music.id" class="glass-card p-4 rounded-xl flex items-center justify-between border border-slate-800 hover:border-slate-700 transition-all hover:scale-[1.01]">
+            <div v-for="music in store.musics" :key="music.id" class="py-3 flex items-center justify-between border-b border-slate-800/50 last:border-0 hover:bg-slate-900/10 transition-all px-2 rounded-xl">
               <div class="flex items-center gap-3 min-w-0">
                 <img v-if="music.cover_url" :src="music.cover_url" class="w-10 h-10 rounded-lg object-cover flex-shrink-0 border border-slate-800" />
                 <div class="min-w-0">
@@ -145,7 +145,7 @@
                 </div>
               </div>
               <button @click="deleteSubmittedMusic(music.id)" class="bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 p-2 rounded-lg border border-rose-500/20 transition-all">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-4 h-4">
                   <path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
                 </svg>
               </button>

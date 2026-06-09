@@ -235,13 +235,13 @@
             </span>
           </div>
 
-          <!-- Players Grid with TransitionGroup -->
+          <!-- Players List with TransitionGroup -->
           <TransitionGroup
             name="list"
             tag="div"
-            class="grid sm:grid-cols-2 gap-4"
+            class="space-y-2"
           >
-            <div v-for="player in store.players" :key="player.id" :class="['glass-card p-4 rounded-xl flex items-center justify-between border border-slate-800 transition-all duration-300 hover:border-slate-700 hover:scale-[1.01]', !player.is_connected ? 'opacity-40 border-slate-900 bg-slate-950/40' : '']">
+            <div v-for="player in store.players" :key="player.id" :class="['py-3.5 flex items-center justify-between border-b border-slate-800/50 last:border-0 hover:bg-slate-900/10 transition-all duration-300 px-2 rounded-xl', !player.is_connected ? 'opacity-40' : '']">
               <div class="flex items-center gap-3 min-w-0">
                 <!-- Status circle indicator -->
                 <span :class="['w-2.5 h-2.5 rounded-full flex-shrink-0', player.is_connected ? 'bg-emerald-500 animate-pulse' : 'bg-rose-500']"></span>

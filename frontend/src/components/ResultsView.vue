@@ -111,121 +111,111 @@
           </div>
         </div>
       </section>
-      <section class="glass-panel p-6 rounded-3xl border border-slate-800/60 shadow-xl">
-        <h2 class="text-xl font-bold text-white mb-6 flex items-center gap-2">
-          <span>📊</span> Tableau des scores
-        </h2>
-        
-        <div class="space-y-3">
-          <div v-for="(player, idx) in store.ranking" :key="player.id" 
-            class="stagger-item glass-card p-4 rounded-2xl border border-slate-800/60 hover:border-slate-700 flex flex-col sm:flex-row sm:items-center justify-between gap-4 transition-all duration-300 hover:scale-[1.01] hover:bg-slate-900/10" 
-            :style="{ animationDelay: `${idx * 0.05}s` }">
-            
-            <div class="flex items-center gap-4">
-              <!-- Rank number inside a badge -->
-              <div :class="[
-                'w-10 h-10 rounded-xl flex items-center justify-center font-black text-sm font-mono border shadow-sm',
-                idx === 0 ? 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30' :
-                idx === 1 ? 'bg-slate-400/20 text-slate-300 border-slate-400/30' :
-                idx === 2 ? 'bg-amber-700/20 text-amber-500 border-amber-700/30' :
-                'bg-slate-900/60 text-slate-400 border-slate-850'
-              ]">
-                #{{ idx + 1 }}
-              </div>
+      <!-- 2-column layout for Scores and Music History -->
+      <div class="grid md:grid-cols-2 gap-8 items-start">
+        <!-- Tableau des scores -->
+        <section class="glass-panel p-6 rounded-3xl border border-slate-800/60 shadow-xl">
+          <h2 class="text-xl font-bold text-white mb-6 flex items-center gap-2">
+            <span>📊</span> Tableau des scores
+          </h2>
+          
+          <div class="space-y-3">
+            <div v-for="(player, idx) in store.ranking" :key="player.id" 
+              class="stagger-item flex flex-col sm:flex-row sm:items-center justify-between gap-4 py-4 border-b border-slate-800/50 last:border-0 hover:bg-slate-900/10 transition-all duration-300 px-2 rounded-xl" 
+              :style="{ animationDelay: `${idx * 0.05}s` }">
               
-              <!-- Initial Avatar -->
-              <div :class="[
-                'w-10 h-10 rounded-full border flex items-center justify-center font-bold uppercase text-sm shadow-sm transition-colors duration-300',
-                idx === 0 ? 'bg-gradient-to-br from-yellow-500/20 to-yellow-600/10 border-yellow-500/40 text-yellow-300' :
-                idx === 1 ? 'bg-gradient-to-br from-slate-400/20 to-slate-500/10 border-slate-400/40 text-slate-200' :
-                idx === 2 ? 'bg-gradient-to-br from-amber-700/20 to-amber-800/10 border-amber-700/40 text-amber-400' :
-                'bg-gradient-to-br from-slate-700 to-slate-900 border-slate-800 text-slate-300'
-              ]">
-                {{ player.name.substring(0, 2) }}
-              </div>
-              
-              <!-- Name & Tags -->
-              <div class="flex flex-col">
-                <div class="flex items-center gap-2">
-                  <span class="font-bold text-white text-base">{{ player.name }}</span>
-                  <span v-if="player.is_bot" class="text-[9px] bg-cyan-500/20 text-cyan-400 px-1.5 py-0.5 rounded font-extrabold border border-cyan-500/30 uppercase tracking-wider">Bot</span>
-                  <span v-if="player.is_observer" class="text-[9px] bg-slate-700/30 text-slate-400 px-1.5 py-0.5 rounded font-bold uppercase tracking-wider">Obs</span>
+              <div class="flex items-center gap-4">
+                <!-- Rank number inside a badge -->
+                <div :class="[
+                  'w-10 h-10 rounded-xl flex items-center justify-center font-black text-sm font-mono border shadow-sm',
+                  idx === 0 ? 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30' :
+                  idx === 1 ? 'bg-slate-400/20 text-slate-300 border-slate-400/30' :
+                  idx === 2 ? 'bg-amber-700/20 text-amber-500 border-amber-700/30' :
+                  'bg-slate-900/60 text-slate-400 border-slate-850'
+                ]">
+                  #{{ idx + 1 }}
                 </div>
-                <!-- Quick stats preview for small screens -->
-                <span class="text-xs text-slate-500 sm:hidden mt-0.5">
-                  🎯 {{ player.correctGuesses || 0 }} correct • 💜 {{ player.votesReceived || 0 }} votes
+                
+                <!-- Initial Avatar -->
+                <div :class="[
+                  'w-10 h-10 rounded-full border flex items-center justify-center font-bold uppercase text-sm shadow-sm transition-colors duration-300',
+                  idx === 0 ? 'bg-gradient-to-br from-yellow-500/20 to-yellow-600/10 border-yellow-500/40 text-yellow-300' :
+                  idx === 1 ? 'bg-gradient-to-br from-slate-400/20 to-slate-500/10 border-slate-400/40 text-slate-200' :
+                  idx === 2 ? 'bg-gradient-to-br from-amber-700/20 to-amber-800/10 border-amber-700/40 text-amber-400' :
+                  'bg-gradient-to-br from-slate-700 to-slate-900 border-slate-800 text-slate-300'
+                ]">
+                  {{ player.name.substring(0, 2) }}
+                </div>
+                
+                <!-- Name & Tags -->
+                <div class="flex flex-col">
+                  <div class="flex items-center gap-2">
+                    <span class="font-bold text-white text-base">{{ player.name }}</span>
+                    <span v-if="player.is_bot" class="text-[9px] bg-cyan-500/20 text-cyan-400 px-1.5 py-0.5 rounded font-extrabold border border-cyan-500/30 uppercase tracking-wider">Bot</span>
+                    <span v-if="player.is_observer" class="text-[9px] bg-slate-700/30 text-slate-400 px-1.5 py-0.5 rounded font-bold uppercase tracking-wider">Obs</span>
+                  </div>
+                  <!-- Compact stats under the name -->
+                  <span class="text-xs text-slate-400 mt-0.5">
+                    🎯 {{ player.correctGuesses || 0 }} correct • 💜 {{ player.votesReceived || 0 }} votes
+                  </span>
+                </div>
+              </div>
+              
+              <!-- Total Score -->
+              <div class="text-right flex items-center justify-between sm:justify-end gap-3 border-t border-slate-850 pt-3 sm:border-0 sm:pt-0">
+                <span class="text-xs text-slate-500 sm:hidden">Score final :</span>
+                <span class="font-black text-cyan-400 text-xl font-mono tracking-wide">
+                  {{ player.score }} <span class="text-xs font-medium text-slate-400">pts</span>
                 </span>
               </div>
             </div>
-            
-            <!-- Stats column (hidden on mobile, shown on sm+) -->
-            <div class="hidden sm:flex items-center gap-6">
-              <div class="flex items-center gap-1.5 bg-emerald-500/5 border border-emerald-500/10 px-3 py-1 rounded-full text-emerald-400 text-xs font-semibold">
-                <span>🎯</span>
-                <span>{{ player.correctGuesses || 0 }} correctes</span>
-                <span class="text-[10px] text-emerald-500/80 font-mono">(x2)</span>
-              </div>
-              <div class="flex items-center gap-1.5 bg-purple-500/5 border border-purple-500/10 px-3 py-1 rounded-full text-purple-400 text-xs font-semibold">
-                <span>💜</span>
-                <span>{{ player.votesReceived || 0 }} votes reçus</span>
-                <span class="text-[10px] text-purple-500/80 font-mono">(x1)</span>
-              </div>
-            </div>
-            
-            <!-- Total Score -->
-            <div class="text-right flex items-center justify-between sm:justify-end gap-3 border-t border-slate-850 pt-3 sm:border-0 sm:pt-0">
-              <span class="text-xs text-slate-500 sm:hidden">Score final :</span>
-              <span class="font-black text-cyan-400 text-xl font-mono tracking-wide">
-                {{ player.score }} <span class="text-xs font-medium text-slate-400">pts</span>
-              </span>
-            </div>
           </div>
-        </div>
-      </section>
-
-      <!-- Music Reveal History -->
-      <section class="glass-panel p-6 rounded-3xl border border-slate-800/60 shadow-xl">
-        <h2 class="text-xl font-bold text-white mb-6 flex items-center gap-2">
-          <span>🎵</span> Musiques de la partie
-        </h2>
-        
-        <div class="grid sm:grid-cols-2 gap-4">
-          <div v-for="music in store.musics" :key="music.id" 
-            class="music-item-card glass-card p-4 rounded-2xl border border-slate-850 flex items-center justify-between group overflow-hidden">
-            
-            <div class="flex items-center gap-4 min-w-0 z-10">
-              <!-- Pochette avec vinyle coulissant -->
-              <div class="relative w-14 h-14 flex-shrink-0 flex items-center justify-center">
-                <!-- Vinyle coulissant -->
-                <div class="vinyl-disc absolute w-12 h-12 rounded-full bg-slate-950 border border-slate-800 flex items-center justify-center shadow-lg -z-10">
-                  <div class="w-4 h-4 rounded-full bg-cyan-500/30 border border-cyan-400/50 flex items-center justify-center">
-                    <div class="w-1 h-1 rounded-full bg-slate-950"></div>
+        </section>
+  
+        <!-- Music Reveal History -->
+        <section class="glass-panel p-6 rounded-3xl border border-slate-800/60 shadow-xl">
+          <h2 class="text-xl font-bold text-white mb-6 flex items-center gap-2">
+            <span>🎵</span> Musiques de la partie
+          </h2>
+          
+          <div class="space-y-3">
+            <div v-for="music in store.musics" :key="music.id" 
+              class="music-item-card flex items-center justify-between py-4 border-b border-slate-800/50 last:border-0 transition-all px-2 rounded-xl hover:bg-slate-900/10 group overflow-hidden">
+              
+              <div class="flex items-center gap-4 min-w-0 z-10">
+                <!-- Pochette avec vinyle coulissant -->
+                <div class="relative w-14 h-14 flex-shrink-0 flex items-center justify-center">
+                  <!-- Vinyle coulissant -->
+                  <div class="vinyl-disc absolute w-12 h-12 rounded-full bg-slate-950 border border-slate-800 flex items-center justify-center shadow-lg -z-10">
+                    <div class="w-4 h-4 rounded-full bg-cyan-500/30 border border-cyan-400/50 flex items-center justify-center">
+                      <div class="w-1 h-1 rounded-full bg-slate-950"></div>
+                    </div>
+                  </div>
+                  
+                  <!-- Cover Image -->
+                  <img v-if="music.cover_url" :src="music.cover_url" 
+                    class="relative w-14 h-14 rounded-xl object-cover shadow border border-slate-800/80 z-10 transition-transform duration-300 group-hover:scale-95" />
+                  <div v-else class="relative w-14 h-14 rounded-xl bg-gradient-to-br from-cyan-500/20 to-purple-500/20 border border-slate-800 flex items-center justify-center text-slate-400 z-10 transition-transform duration-300 group-hover:scale-95">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-6 h-6">
+                      <path fill-rule="evenodd" d="M19.952 1.651a.75.75 0 0 1 .298.599V16.303a3 3 0 0 1-2.176 2.884l-1.32.377a3 3 0 0 1-3.176-1.424l-3.32-5.32a3 3 0 0 1-.397-1.503V4.282A3 3 0 0 1 12.64 1.398l6.3-1.651a.75.75 0 0 1 1.012.904ZM12.64 2.898a1.5 1.5 0 0 0-.89 1.384v5.334a1.5 1.5 0 0 0 .198.752l3.32 5.32a1.5 1.5 0 0 0 .1588.712l1.32-.377a1.5 1.5 0 0 0 .1088-1.442V3.402l-5.3 1.388a.75.75 0 0 1-.298.058Z" clip-rule="evenodd" />
+                    </svg>
                   </div>
                 </div>
                 
-                <!-- Cover Image -->
-                <img v-if="music.cover_url" :src="music.cover_url" 
-                  class="relative w-14 h-14 rounded-xl object-cover shadow border border-slate-800/80 z-10 transition-transform duration-300 group-hover:scale-95" />
-                <div v-else class="relative w-14 h-14 rounded-xl bg-gradient-to-br from-cyan-500/20 to-purple-500/20 border border-slate-800 flex items-center justify-center text-slate-400 z-10 transition-transform duration-300 group-hover:scale-95">
-                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-6 h-6">
-                    <path fill-rule="evenodd" d="M19.952 1.651a.75.75 0 0 1 .298.599V16.303a3 3 0 0 1-2.176 2.884l-1.32.377a3 3 0 0 1-3.176-1.424l-3.32-5.32a3 3 0 0 1-.397-1.503V4.282A3 3 0 0 1 12.64 1.398l6.3-1.651a.75.75 0 0 1 1.012.904ZM12.64 2.898a1.5 1.5 0 0 0-.89 1.384v5.334a1.5 1.5 0 0 0 .198.752l3.32 5.32a1.5 1.5 0 0 0 .1588.712l1.32-.377a1.5 1.5 0 0 0 .1088-1.442V3.402l-5.3 1.388a.75.75 0 0 1-.298.058Z" clip-rule="evenodd" />
-                  </svg>
+                <div class="min-w-0 ml-1">
+                  <p class="font-extrabold text-white text-base truncate">{{ music.title }}</p>
+                  <p class="text-slate-400 text-sm truncate font-medium">{{ music.artist }}</p>
                 </div>
               </div>
               
-              <div class="min-w-0 ml-1">
-                <p class="font-extrabold text-white text-base truncate">{{ music.title }}</p>
-                <p class="text-slate-400 text-sm truncate font-medium">{{ music.artist }}</p>
+              <div class="text-right pl-4 z-10 flex flex-col items-end">
+                <span class="text-[9px] text-slate-500 uppercase font-black tracking-widest block mb-0.5">Proposé par</span>
+                <span class="font-extrabold text-sm text-yellow-400 bg-yellow-400/5 border border-yellow-400/10 px-2.5 py-1 rounded-lg inline-block truncate max-w-[120px]">{{ getPlayerName(music.player_id) }}</span>
               </div>
             </div>
-            
-            <div class="text-right pl-4 z-10 flex flex-col items-end">
-              <span class="text-[9px] text-slate-500 uppercase font-black tracking-widest block mb-0.5">Proposé par</span>
-              <span class="font-extrabold text-sm text-yellow-400 bg-yellow-400/5 border border-yellow-400/10 px-2.5 py-1 rounded-lg inline-block truncate max-w-[120px]">{{ getPlayerName(music.player_id) }}</span>
-            </div>
           </div>
-        </div>
-      </section>
+        </section>
+      </div>
     </main>
 
     <!-- Manage Players Modal -->
