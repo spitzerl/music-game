@@ -491,26 +491,37 @@ const drawGlowBlob = (ctx, x, y, r, color) => {
 };
 
 const exportImage = () => {
+  const ranking = store.ranking || [];
+  const first = ranking[0];
+  const second = ranking[1];
+  const third = ranking[2];
+
+  // We exclude the top 3 players from the list
+  const remainingPlayersCount = Math.max(0, ranking.length - 3);
+  // Panel height needs to fit remaining players (40px per row) or stats (which take about 240px)
+  const panelHeight = Math.max(240, 85 + remainingPlayersCount * 40);
+  const canvasHeight = 450 + panelHeight + 110;
+
   const canvas = document.createElement('canvas');
   canvas.width = 800;
-  canvas.height = 800;
+  canvas.height = canvasHeight;
   const ctx = canvas.getContext('2d');
 
   // 1. Background radial gradient
-  const bgGrad = ctx.createRadialGradient(400, 400, 50, 400, 400, 600);
+  const bgGrad = ctx.createRadialGradient(400, canvasHeight / 2, 50, 400, canvasHeight / 2, Math.max(600, canvasHeight));
   bgGrad.addColorStop(0, '#100e2b'); // Indigo/purple 950 base
   bgGrad.addColorStop(0.6, '#080c18'); // slate 900 base
   bgGrad.addColorStop(1, '#020308'); // black/slate 950 base
   ctx.fillStyle = bgGrad;
-  ctx.fillRect(0, 0, 800, 800);
+  ctx.fillRect(0, 0, 800, canvasHeight);
 
   // Draw Glow Blobs to mirror the UI
   drawGlowBlob(ctx, 150, 150, 300, 'rgba(124, 58, 237, 0.08)'); // Purple glow top-left
-  drawGlowBlob(ctx, 650, 650, 300, 'rgba(6, 182, 212, 0.08)');  // Cyan glow bottom-right
-  drawGlowBlob(ctx, 400, 350, 250, 'rgba(219, 39, 119, 0.05)');  // Pink glow center
+  drawGlowBlob(ctx, 650, canvasHeight - 150, 300, 'rgba(6, 182, 212, 0.08)');  // Cyan glow bottom-right
+  drawGlowBlob(ctx, 400, canvasHeight / 2, 250, 'rgba(219, 39, 119, 0.05)');  // Pink glow center
 
   // 2. Vinyl disc decorative background
-  drawVinyl(ctx, 740, 740, 150);
+  drawVinyl(ctx, 740, canvasHeight - 60, 150);
 
   // 3. Header title and info
   // Title "CÉKIKILAMI" with gradient
@@ -544,11 +555,6 @@ const exportImage = () => {
   ctx.stroke();
 
   // 4. Draw Podium (Top 3)
-  const ranking = store.ranking || [];
-  const first = ranking[0];
-  const second = ranking[1];
-  const third = ranking[2];
-
   const drawPodiumColumn = (x, y, w, h, radius, fillGradStart, borderStyle, player, rankEmoji) => {
     if (!player) return;
 
@@ -602,30 +608,29 @@ const exportImage = () => {
       ctx.fillText('👑', x + w / 2, medalY - medalRadius - 8);
     }
 
-    // 4. Player name inside the column
+    // 4. Player name inside the column (aligned from bottom y + h)
     ctx.fillStyle = '#ffffff';
     ctx.font = '800 14px Outfit, system-ui, sans-serif';
     ctx.textAlign = 'center';
     let displayName = player.name;
     if (player.is_bot) displayName = truncateText(displayName, 10);
     else displayName = truncateText(displayName, 12);
-    ctx.fillText(displayName, x + w / 2, y + 55);
+    ctx.fillText(displayName, x + w / 2, y + h - 90);
 
-    // 5. Score inside the column
+    // 5. Score inside the column (aligned from bottom y + h)
     ctx.fillStyle = rankEmoji === '🥇' ? '#facc15' : rankEmoji === '🥈' ? '#cbd5e1' : '#f97316';
     ctx.font = '900 22px monospace';
-    ctx.fillText(`${player.score}`, x + w / 2 - 10, y + 90);
+    ctx.fillText(`${player.score}`, x + w / 2 - 10, y + h - 55);
     ctx.fillStyle = '#94a3b8';
     ctx.font = '600 11px "Plus Jakarta Sans", sans-serif';
-    ctx.fillText('pts', x + w / 2 + (player.score.toString().length * 6) + 4, y + 90);
+    ctx.fillText('pts', x + w / 2 + (player.score.toString().length * 6) + 4, y + h - 55);
 
-    // 6. Stats badges at the bottom of the column
-    const statsY = y + 125;
+    // 6. Stats badges at the bottom of the column (aligned from bottom y + h)
+    const statsY = y + h - 25;
     const correctVal = player.correctGuesses || 0;
     const votesVal = player.votesReceived || 0;
 
     // Badges layout (horizontal center align)
-    // Width of each badge is 48, gap is 6
     const bW = 48;
     const bH = 18;
     const bRad = 9;
@@ -656,111 +661,83 @@ const exportImage = () => {
 
   // 5. Lower Content Panel: Left (Classment Table) & Right (Stats highlights)
   // Panel background
-  drawRoundedRect(ctx, 50, 450, 700, 240, 16, 'rgba(15, 23, 42, 0.45)', 'rgba(255, 255, 255, 0.06)', 1);
+  drawRoundedRect(ctx, 50, 450, 700, panelHeight, 16, 'rgba(15, 23, 42, 0.45)', 'rgba(255, 255, 255, 0.06)', 1);
 
   // --- Left Column: Rankings ---
   ctx.fillStyle = '#94a3b8';
   ctx.font = '900 12px "Plus Jakarta Sans", system-ui, sans-serif';
   ctx.fillText('CLASSEMENT', 70, 485);
 
-  const maxListPlayers = 4;
   let yOffset = 515;
-  for (let i = 0; i < Math.min(ranking.length, maxListPlayers); i++) {
-    const p = ranking[i];
-    
-    // Draw Rank Badge container
-    let badgeBg = 'rgba(15, 23, 42, 0.6)';
-    let badgeStroke = 'rgba(255, 255, 255, 0.05)';
-    let badgeText = '#94a3b8';
-    if (i === 0) {
-      badgeBg = 'rgba(234, 179, 8, 0.15)';
-      badgeStroke = 'rgba(234, 179, 8, 0.25)';
-      badgeText = '#facc15';
-    } else if (i === 1) {
-      badgeBg = 'rgba(148, 163, 184, 0.15)';
-      badgeStroke = 'rgba(148, 163, 184, 0.25)';
-      badgeText = '#cbd5e1';
-    } else if (i === 2) {
-      badgeBg = 'rgba(180, 83, 9, 0.15)';
-      badgeStroke = 'rgba(180, 83, 9, 0.25)';
-      badgeText = '#f97316';
-    }
-    drawRoundedRect(ctx, 70, yOffset - 16, 32, 22, 6, badgeBg, badgeStroke, 1);
-    
-    // Rank text inside badge
-    ctx.fillStyle = badgeText;
-    ctx.font = '900 11px monospace';
-    ctx.textAlign = 'center';
-    ctx.fillText(`#${i + 1}`, 86, yOffset - 1);
-
-    // Draw Avatar circle
-    ctx.beginPath();
-    ctx.arc(122, yOffset - 5, 12, 0, Math.PI * 2);
-    // Dynamic avatar bg based on rank
-    let avBg = 'rgba(30, 41, 59, 0.8)';
-    let avStroke = 'rgba(255, 255, 255, 0.08)';
-    let avText = '#cbd5e1';
-    if (i === 0) {
-      avBg = 'rgba(234, 179, 8, 0.15)';
-      avStroke = 'rgba(234, 179, 8, 0.3)';
-      avText = '#facc15';
-    } else if (i === 1) {
-      avBg = 'rgba(148, 163, 184, 0.15)';
-      avStroke = 'rgba(148, 163, 184, 0.3)';
-      avText = '#e2e8f0';
-    } else if (i === 2) {
-      avBg = 'rgba(180, 83, 9, 0.15)';
-      avStroke = 'rgba(180, 83, 9, 0.3)';
-      avText = '#f97316';
-    }
-    ctx.fillStyle = avBg;
-    ctx.fill();
-    ctx.strokeStyle = avStroke;
-    ctx.stroke();
-
-    // Avatar initials
-    ctx.fillStyle = avText;
-    ctx.font = 'bold 9px Outfit, sans-serif';
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.fillText(p.name.substring(0, 2).toUpperCase(), 122, yOffset - 5);
-    ctx.textBaseline = 'alphabetic'; // reset
-
-    // Player Name
-    ctx.fillStyle = '#ffffff';
-    ctx.font = '700 13px Outfit, system-ui, sans-serif';
-    ctx.textAlign = 'left';
-    let displayName = p.name;
-    if (p.is_bot) displayName += ' (Bot)';
-    ctx.fillText(truncateText(displayName, 14), 146, yOffset);
-
-    // Player Score
-    ctx.fillStyle = '#22d3ee';
-    ctx.font = '800 13px monospace';
-    ctx.textAlign = 'right';
-    ctx.fillText(`${p.score} pts`, 370, yOffset);
-    ctx.textAlign = 'left'; // reset
-
-    // Separator line
-    ctx.beginPath();
-    ctx.moveTo(70, yOffset + 12);
-    ctx.lineTo(370, yOffset + 12);
-    ctx.strokeStyle = 'rgba(255, 255, 255, 0.04)';
-    ctx.stroke();
-
-    yOffset += 40;
-  }
-
-  if (ranking.length > maxListPlayers) {
+  if (ranking.length <= 3) {
     ctx.fillStyle = '#64748b';
-    ctx.font = '600 11px "Plus Jakarta Sans", sans-serif';
-    ctx.fillText(`+ ${ranking.length - maxListPlayers} autre(s) joueur(s)`, 70, yOffset + 5);
+    ctx.font = 'italic 13px "Plus Jakarta Sans", sans-serif';
+    ctx.fillText('Aucun autre joueur', 70, 515);
+  } else {
+    for (let i = 3; i < ranking.length; i++) {
+      const p = ranking[i];
+      
+      // Draw Rank Badge container
+      let badgeBg = 'rgba(15, 23, 42, 0.6)';
+      let badgeStroke = 'rgba(255, 255, 255, 0.05)';
+      let badgeText = '#94a3b8';
+      drawRoundedRect(ctx, 70, yOffset - 16, 32, 22, 6, badgeBg, badgeStroke, 1);
+      
+      // Rank text inside badge
+      ctx.fillStyle = badgeText;
+      ctx.font = '900 11px monospace';
+      ctx.textAlign = 'center';
+      ctx.fillText(`#${i + 1}`, 86, yOffset - 1);
+
+      // Draw Avatar circle
+      ctx.beginPath();
+      ctx.arc(122, yOffset - 5, 12, 0, Math.PI * 2);
+      let avBg = 'rgba(30, 41, 59, 0.8)';
+      let avStroke = 'rgba(255, 255, 255, 0.08)';
+      let avText = '#cbd5e1';
+      ctx.fillStyle = avBg;
+      ctx.fill();
+      ctx.strokeStyle = avStroke;
+      ctx.stroke();
+
+      // Avatar initials
+      ctx.fillStyle = avText;
+      ctx.font = 'bold 9px Outfit, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(p.name.substring(0, 2).toUpperCase(), 122, yOffset - 5);
+      ctx.textBaseline = 'alphabetic'; // reset
+
+      // Player Name
+      ctx.fillStyle = '#ffffff';
+      ctx.font = '700 13px Outfit, system-ui, sans-serif';
+      ctx.textAlign = 'left';
+      let displayName = p.name;
+      if (p.is_bot) displayName += ' (Bot)';
+      ctx.fillText(truncateText(displayName, 14), 146, yOffset);
+
+      // Player Score
+      ctx.fillStyle = '#22d3ee';
+      ctx.font = '800 13px monospace';
+      ctx.textAlign = 'right';
+      ctx.fillText(`${p.score} pts`, 370, yOffset);
+      ctx.textAlign = 'left'; // reset
+
+      // Separator line
+      ctx.beginPath();
+      ctx.moveTo(70, yOffset + 12);
+      ctx.lineTo(370, yOffset + 12);
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.04)';
+      ctx.stroke();
+
+      yOffset += 40;
+    }
   }
 
   // Vertical Divider
   ctx.beginPath();
   ctx.moveTo(400, 470);
-  ctx.lineTo(400, 665);
+  ctx.lineTo(400, 450 + panelHeight - 25);
   ctx.strokeStyle = 'rgba(255, 255, 255, 0.06)';
   ctx.lineWidth = 1;
   ctx.stroke();
@@ -830,20 +807,20 @@ const exportImage = () => {
 
   // 6. Footer branding
   ctx.beginPath();
-  ctx.moveTo(50, 715);
-  ctx.lineTo(750, 715);
+  ctx.moveTo(50, 450 + panelHeight + 25);
+  ctx.lineTo(750, 450 + panelHeight + 25);
   ctx.strokeStyle = 'rgba(255, 255, 255, 0.05)';
   ctx.lineWidth = 1;
   ctx.stroke();
 
   ctx.fillStyle = '#64748b';
   ctx.font = '600 13px "Plus Jakarta Sans", system-ui, sans-serif';
-  ctx.fillText('CÉKIKILAMI • JEU DE MUSIQUE EN LIGNE', 50, 755);
+  ctx.fillText('CÉKIKILAMI • JEU DE MUSIQUE EN LIGNE', 50, 450 + panelHeight + 65);
 
   ctx.textAlign = 'right';
   ctx.fillStyle = '#475569';
   ctx.font = '500 12px monospace';
-  ctx.fillText('cekikilami.lucasspitzer.fr', 750, 755);
+  ctx.fillText('cekikilami.lucasspitzer.fr', 750, 450 + panelHeight + 65);
   ctx.textAlign = 'left';
 
   exportImageUrl.value = canvas.toDataURL('image/png');
