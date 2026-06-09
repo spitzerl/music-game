@@ -95,42 +95,40 @@
           <h2 class="text-3xl font-extrabold text-white">Qui a proposé ce morceau ?</h2>
           
           <!-- Track details revealed -->
-          <div class="bg-slate-900/80 border border-slate-800 p-5 rounded-2xl max-w-md mx-auto flex items-center gap-4 text-left shadow-lg">
-            <img v-if="store.currentMusic?.cover_url" :src="store.currentMusic.cover_url" class="w-14 h-14 rounded-xl object-cover shadow-md border border-slate-800/80 flex-shrink-0" />
-            <div v-else class="w-14 h-14 rounded-xl bg-gradient-to-tr from-cyan-500 to-purple-600 flex items-center justify-center text-white shadow-md flex-shrink-0">
+          <div class="max-w-md mx-auto flex items-center gap-4 text-left py-2">
+            <img v-if="store.currentMusic?.cover_url" :src="store.currentMusic.cover_url" class="w-16 h-16 rounded-xl object-cover shadow-xl border border-slate-800/60 flex-shrink-0" />
+            <div v-else class="w-16 h-16 rounded-xl bg-gradient-to-tr from-cyan-500 to-purple-600 flex items-center justify-center text-white shadow-xl flex-shrink-0">
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-7 h-7">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M9 9l10.5-3m0 0L21 8.25M19.5 6C19 6 13 12 13 12v6.75m0 0a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
               </svg>
             </div>
             <div class="min-w-0">
-              <p class="font-extrabold text-white text-base truncate">{{ store.currentMusic?.title }}</p>
-              <p class="text-slate-400 text-sm truncate">{{ store.currentMusic?.artist }}</p>
+              <p class="font-extrabold text-white text-lg truncate">{{ store.currentMusic?.title }}</p>
+              <p class="text-slate-400 text-sm truncate mt-0.5">{{ store.currentMusic?.artist }}</p>
             </div>
           </div>
         </div>
 
         <!-- Revelation Phase -->
         <div v-else-if="status === 'revelation'" class="w-full py-4 flex flex-col items-center">
-          <div class="bg-slate-900/40 border border-slate-800/80 rounded-3xl p-6 md:p-8 max-w-sm w-full shadow-2xl flex flex-col items-center text-center">
-            <!-- Large cover art -->
-            <div class="relative group mb-5">
-              <img v-if="store.currentMusic?.cover_url" :src="store.currentMusic.cover_url" class="w-44 h-44 rounded-2xl object-cover shadow-2xl border border-slate-800 transition-transform duration-500 group-hover:scale-105" />
-              <div v-else class="w-44 h-44 rounded-2xl bg-gradient-to-tr from-cyan-500 to-purple-600 flex items-center justify-center text-white shadow-2xl border border-slate-800">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-16 h-16 opacity-80">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M9 9l10.5-3m0 0L21 8.25M19.5 6C19 6 13 12 13 12v6.75m0 0a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
-                </svg>
-              </div>
+          <!-- Large cover art -->
+          <div class="relative group mb-5">
+            <img v-if="store.currentMusic?.cover_url" :src="store.currentMusic.cover_url" class="w-44 h-44 rounded-2xl object-cover shadow-2xl border border-slate-800 transition-transform duration-500 group-hover:scale-105" />
+            <div v-else class="w-44 h-44 rounded-2xl bg-gradient-to-tr from-cyan-500 to-purple-600 flex items-center justify-center text-white shadow-2xl border border-slate-800">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-16 h-16 opacity-80">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 9l10.5-3m0 0L21 8.25M19.5 6C19 6 13 12 13 12v6.75m0 0a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+              </svg>
             </div>
+          </div>
 
-            <!-- Song info -->
-            <h3 class="text-xl font-extrabold text-white leading-snug truncate max-w-full">{{ store.currentMusic?.title }}</h3>
-            <p class="text-sm text-slate-400 font-medium truncate max-w-full mt-1 mb-6">{{ store.currentMusic?.artist }}</p>
+          <!-- Song info -->
+          <h3 class="text-2xl font-extrabold text-white leading-snug truncate max-w-full">{{ store.currentMusic?.title }}</h3>
+          <p class="text-base text-slate-400 font-medium truncate max-w-full mt-1.5 mb-6">{{ store.currentMusic?.artist }}</p>
 
-            <!-- Proposer -->
-            <div class="w-full bg-gradient-to-r from-yellow-500/10 to-amber-500/10 border border-yellow-500/20 py-3 px-5 rounded-2xl flex flex-col items-center justify-center gap-0.5">
-              <span class="text-[10px] text-yellow-500/70 uppercase font-black tracking-widest">Proposé par</span>
-              <span class="text-xl font-black text-yellow-400 tracking-wide">{{ proposerName }}</span>
-            </div>
+          <!-- Proposer -->
+          <div class="flex flex-col items-center justify-center gap-1">
+            <span class="text-xs text-yellow-500/80 uppercase font-black tracking-widest">Proposé par</span>
+            <span class="text-3xl font-black text-yellow-400 tracking-wide animate-pulse">{{ proposerName }}</span>
           </div>
 
           <!-- Host: advance to next round -->
