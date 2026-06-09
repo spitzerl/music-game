@@ -1,5 +1,5 @@
 <template>
-  <div class="min-h-screen p-6 max-w-6xl mx-auto flex flex-col justify-between opacity-0 animate-fade-in-up">
+  <div class="min-h-screen p-6 max-w-7xl mx-auto flex flex-col justify-start gap-4 opacity-0 animate-fade-in-up">
     <!-- Header -->
     <header class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8 pb-4 border-b border-slate-800">
       <div>

@@ -1,5 +1,5 @@
 <template>
-  <div class="min-h-screen p-6 max-w-5xl mx-auto flex flex-col justify-between opacity-0 animate-fade-in-up relative">
+  <div class="min-h-screen p-6 max-w-7xl mx-auto flex flex-col justify-start gap-4 opacity-0 animate-fade-in-up relative">
     <!-- Ambient glowing backgrounds -->
     <div class="glow-blob bg-purple-600 w-96 h-96 top-1/4 left-1/4 -translate-x-1/2 -translate-y-1/2"></div>
     <div class="glow-blob bg-cyan-600 w-96 h-96 bottom-1/4 right-1/4 translate-x-1/2 translate-y-1/2"></div>
