@@ -41,7 +41,7 @@
     </header>
 
     <!-- Main Board -->
-    <main class="grid gap-8 mb-8 items-start">
+    <main class="grid md:grid-cols-2 gap-8 mb-8 items-start">
       <!-- Status Box -->
       <section class="glass-panel p-8 rounded-3xl border border-slate-800 text-center relative overflow-hidden flex flex-col items-center justify-center min-h-[300px]">
         <!-- Idle Phase (Configuration / Ready to start) -->
@@ -198,7 +198,7 @@
         <!-- Revelation Details -->
         <div v-else-if="status === 'revelation'" class="space-y-4">
           <h3 class="text-lg font-bold text-white mb-4">Détail des votes</h3>
-          <div class="space-y-2 max-h-60 overflow-y-auto pr-2">
+          <div class="space-y-2 max-h-[450px] overflow-y-auto pr-2">
             <div v-for="vote in store.votes" :key="vote.id" class="flex items-center justify-between p-3 rounded-xl bg-slate-900/60 border border-slate-850">
               <div class="flex items-center gap-2">
                 <span class="font-bold text-slate-200 text-sm">{{ getPlayerName(vote.voter_id) }}</span>
