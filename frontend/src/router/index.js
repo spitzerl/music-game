@@ -13,6 +13,7 @@ const routes = [
   { path: '/game/:code/selection', component: SelectionPhase },
   { path: '/game/:code/voting', component: VotingPhase },
   { path: '/game/:code/results', component: ResultsView },
+  { path: '/test-export', component: ResultsView },
 ];
 
 export default createRouter({
