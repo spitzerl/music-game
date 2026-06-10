@@ -43,7 +43,7 @@
     <!-- Main Board -->
     <main class="grid md:grid-cols-2 gap-6 mb-8 items-start">
       <!-- Status Box -->
-      <section class="glass-panel p-8 rounded-3xl border border-slate-800 text-center relative overflow-hidden flex flex-col items-center justify-center min-h-[300px]">
+      <section class="glass-panel p-8 rounded-3xl border border-slate-800 text-center relative overflow-hidden flex flex-col items-center justify-center h-[500px]">
         <!-- Idle Phase (Configuration / Ready to start) -->
         <div v-if="status === 'idle'" class="space-y-6 w-full max-w-xl text-center py-6">
           <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 text-xs font-bold uppercase tracking-wider mb-2">
@@ -152,14 +152,14 @@
       </section>
 
       <!-- Interactive Zone (Voting List or Revelation Details) -->
-      <section class="glass-panel p-6 rounded-2xl border border-slate-800">
+      <section class="glass-panel p-6 rounded-2xl border border-slate-800 h-[500px] flex flex-col overflow-hidden">
         <!-- Idle Zone Info -->
-        <div v-if="status === 'idle'" class="text-center py-6 text-slate-500 italic text-sm">
+        <div v-if="status === 'idle'" class="h-full flex items-center justify-center text-center text-slate-500 italic text-sm">
           En attente du lancement de la manche par l'hôte...
         </div>
 
         <!-- Voting Active -->
-        <div v-else-if="status === 'voting'" class="space-y-4">
+        <div v-else-if="status === 'voting'" class="flex flex-col h-full space-y-4">
           <!-- Proposer Message -->
           <div v-if="isProposer" class="text-center py-4 bg-purple-500/10 border border-purple-500/20 p-4 rounded-xl text-purple-400 font-medium text-sm">
             📢 Vous avez proposé ce morceau. Votre vote sert uniquement à bluffer les autres joueurs !
@@ -170,12 +170,12 @@
           </div>
 
           <!-- Voter Buttons Grid -->
-          <div v-if="!isObserver" class="space-y-3">
-            <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Sélectionnez le suspect :</p>
+          <div v-if="!isObserver" class="flex flex-col flex-1 min-h-0 space-y-3">
+            <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2 flex-shrink-0">Sélectionnez le suspect :</p>
             <TransitionGroup
               name="list"
               tag="div"
-              class="grid sm:grid-cols-2 gap-4"
+              class="grid sm:grid-cols-2 gap-4 overflow-y-auto pr-2 pb-2"
             >
               <button
                 v-for="target in eligiblePlayers"
@@ -195,9 +195,9 @@
         </div>
 
         <!-- Revelation Details -->
-        <div v-else-if="status === 'revelation'" class="space-y-4">
-          <h3 class="text-lg font-bold text-white mb-4">Détail des votes</h3>
-          <div class="space-y-2 max-h-[450px] overflow-y-auto pr-2">
+        <div v-else-if="status === 'revelation'" class="flex flex-col h-full space-y-4">
+          <h3 class="text-lg font-bold text-white mb-4 flex-shrink-0">Détail des votes</h3>
+          <div class="space-y-2 flex-1 overflow-y-auto pr-2 pb-2">
             <div v-for="vote in store.votes" :key="vote.id" class="flex items-center justify-between py-3.5 border-b border-slate-800/50 last:border-0 hover:bg-slate-900/10 transition-all px-2 rounded-xl">
               <div class="flex items-center gap-2">
                 <span class="font-bold text-slate-200 text-sm">{{ getPlayerName(vote.voter_id) }}</span>
@@ -221,7 +221,7 @@
         </div>
 
         <!-- Listening Lock Info -->
-        <div v-else-if="status === 'listening'" class="text-center py-6 text-slate-500 italic text-sm">
+        <div v-else-if="status === 'listening'" class="h-full flex items-center justify-center text-center text-slate-500 italic text-sm">
           Les options de vote apparaîtront dès la fin de l'écoute.
         </div>
       </section>
