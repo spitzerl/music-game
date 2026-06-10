@@ -54,8 +54,12 @@ export default function buildRoutes(gameService, ioNamespace) {
 
   router.get('/deezer/search', async (req, res, next) => {
     try {
-      const queryText = requireNonEmptyString(req.query?.q, 'q');
-      const response = await fetch(`https://api.deezer.com/search?q=${encodeURIComponent(queryText)}&limit=10`);
+      const queryText = req.query?.q ? req.query.q.trim() : '';
+      const url = queryText 
+        ? `https://api.deezer.com/search?q=${encodeURIComponent(queryText)}&limit=25`
+        : `https://api.deezer.com/chart/0/tracks?limit=25`;
+
+      const response = await fetch(url);
 
       if (!response.ok) {
         const error = new Error('Deezer indisponible');
