@@ -225,6 +225,23 @@
           </div>
         </div>
 
+        <!-- Blind Test Revelation -->
+        <div v-else-if="status === 'blindtest_revelation'" class="h-full flex flex-col justify-center items-center text-center space-y-4">
+          <p class="text-xs font-semibold text-cyan-400 uppercase tracking-wider mb-2">Fin du Blind Test</p>
+          <div class="text-2xl font-black text-white">
+            {{ store.currentMusic?.title }}
+          </div>
+          <div class="text-lg font-bold text-slate-400 mb-4">
+            {{ store.currentMusic?.artist }}
+          </div>
+          <div v-if="!isObserver && blindTestResult" :class="['mt-2 px-6 py-2 rounded-full border text-sm font-bold uppercase tracking-wider', blindTestResult.is_correct ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30' : 'bg-rose-500/20 text-rose-400 border-rose-500/30']">
+            {{ blindTestResult.is_correct ? '✓ Trouvé (+1 pt)' : '✗ Incorrect' }}
+          </div>
+          <div v-else-if="!isObserver" class="mt-2 px-6 py-2 rounded-full border text-sm font-bold uppercase tracking-wider bg-slate-800/50 text-slate-400 border-slate-700">
+            Pas de réponse
+          </div>
+        </div>
+
         <!-- Listening Lock Info or Blind Test -->
         <div v-else-if="status === 'listening'" class="h-full flex flex-col justify-center">
           <div v-if="!store.session?.enable_blind_test" class="text-center text-slate-500 italic text-sm">

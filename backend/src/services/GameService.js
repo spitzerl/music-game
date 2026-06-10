@@ -352,6 +352,8 @@ export default class GameService {
     let duration = 0;
     if (status === 'listening') {
       duration = session.extract_duration;
+    } else if (status === 'blindtest_revelation') {
+      duration = 5; // 5 seconds to show the answer
     } else if (status === 'voting') {
       duration = session.voting_duration;
     } else if (status === 'revelation') {
@@ -365,6 +367,13 @@ export default class GameService {
       const callback = async () => {
         this.log(code, `Subphase timer finished for music index ${musicIndex}, status ${status}`);
         if (status === 'listening') {
+          // Transition to voting, or blindtest_revelation
+          if (session.enable_blind_test) {
+            await this.enterVotingSubphase(code, musicIndex, 'blindtest_revelation');
+          } else {
+            await this.enterVotingSubphase(code, musicIndex, 'voting');
+          }
+        } else if (status === 'blindtest_revelation') {
           // Transition to voting
           await this.enterVotingSubphase(code, musicIndex, 'voting');
         } else if (status === 'voting') {
@@ -445,6 +454,12 @@ export default class GameService {
     this.clearTimer(code);
 
     if (status === 'listening') {
+      if (session.enable_blind_test) {
+        await this.enterVotingSubphase(code, musicIndex, 'blindtest_revelation');
+      } else {
+        await this.enterVotingSubphase(code, musicIndex, 'voting');
+      }
+    } else if (status === 'blindtest_revelation') {
       await this.enterVotingSubphase(code, musicIndex, 'voting');
     } else if (status === 'voting') {
       if (session.show_answers) {
@@ -742,7 +757,7 @@ export default class GameService {
         if (session.enable_blind_test) {
           currentMusic.blind_test_answers = currentBlindTestAnswers;
           // Hide other players' answers unless revelation
-          if (session.voting_status === 'listening' || session.voting_status === 'voting') {
+          if (session.voting_status === 'listening' || session.voting_status === 'voting' || session.voting_status === 'blindtest_revelation') {
              const parsedPlayerId = playerId ? Number.parseInt(playerId, 10) : null;
              if (parsedPlayerId) {
                 currentMusic.blind_test_answers = currentBlindTestAnswers.filter(b => b.player_id === parsedPlayerId);
