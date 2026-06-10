@@ -46,9 +46,9 @@
       </button>
     </div>
 
-    <div class="grid md:grid-cols-3 gap-8 items-start mb-8">
+    <div class="flex flex-col gap-8 items-stretch mb-8">
       <!-- Left & Center Columns: Music search and added songs -->
-      <div :class="['md:col-span-2 grid lg:grid-cols-2 gap-8', activeTab === 'selection' ? 'block' : 'hidden md:grid']">
+      <div :class="['grid lg:grid-cols-2 gap-8', activeTab === 'selection' ? 'block' : 'hidden md:grid']">
         <!-- Left Column: Music search -->
         <section class="glass-panel p-6 rounded-2xl border border-slate-800 flex flex-col h-full">
           <div class="flex-1">
@@ -160,48 +160,43 @@
         </section>
       </div>
 
-      <!-- Right Column: Submission Tracker -->
-      <section :class="['glass-panel p-6 rounded-2xl md:col-span-1 border border-slate-800', activeTab === 'tracker' ? 'block' : 'hidden md:block']">
-        <h2 class="text-xl font-bold text-white mb-6 flex items-center gap-2">
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5 text-purple-400">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337 9.337 0 0 0 4.121-.952 4.125 4.125 0 0 0-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.109A3.318 3.318 0 0 1 11.682 22H8.318A3.318 3.318 0 0 1 5 19.237v-.109c0-1.113.285-2.16.786-3.07M15 19.128v-.109a3.318 3.318 0 0 0-3.318-3.318H8.318a3.318 3.318 0 0 0-3.318 3.318v.109M15 19.128v.109c0 .248-.027.493-.08.73M5 19.128v.109c.053.237.08.482.08.73m0 0A3.318 3.318 0 0 1 8.318 22h3.364a3.318 3.318 0 0 0 3.238-2.673M5 19.128v-.109c0-.218.02-.435.06-.645m10.28 0a3.3 3.3 0 0 0-.06-.645M19.5 8.25a3 3 0 1 1-6 0 3 3 0 0 1 6 0ZM6.75 6a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Zm13.5 9a2.25 2.25 0 0 0-4.5 0 2.25 2.25 0 0 0 4.5 0Z" />
-          </svg>
-          Suivi des dépôts
-        </h2>
+      <!-- Bottom Row: Submission Tracker -->
+      <section :class="['glass-panel p-5 rounded-2xl border border-slate-800', activeTab === 'tracker' ? 'block' : 'hidden md:block']">
+        <div class="flex items-center justify-between mb-4">
+          <h2 class="text-lg font-bold text-white flex items-center gap-2">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5 text-purple-400">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337 9.337 0 0 0 4.121-.952 4.125 4.125 0 0 0-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.109A3.318 3.318 0 0 1 11.682 22H8.318A3.318 3.318 0 0 1 5 19.237v-.109c0-1.113.285-2.16.786-3.07M15 19.128v-.109a3.318 3.318 0 0 0-3.318-3.318H8.318a3.318 3.318 0 0 0-3.318 3.318v.109M15 19.128v.109c0 .248-.027.493-.08.73M5 19.128v.109c.053.237.08.482.08.73m0 0A3.318 3.318 0 0 1 8.318 22h3.364a3.318 3.318 0 0 0 3.238-2.673M5 19.128v-.109c0-.218.02-.435.06-.645m10.28 0a3.3 3.3 0 0 0-.06-.645M19.5 8.25a3 3 0 1 1-6 0 3 3 0 0 1 6 0ZM6.75 6a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Zm13.5 9a2.25 2.25 0 0 0-4.5 0 2.25 2.25 0 0 0 4.5 0Z" />
+            </svg>
+            Suivi des dépôts
+          </h2>
+        </div>
 
-        <div class="space-y-4">
-          <div v-for="player in store.players" :key="player.id" class="flex items-center justify-between border-b border-slate-800 pb-3 last:border-0 last:pb-0">
-            <div class="flex items-center gap-2 min-w-0">
+        <div class="flex flex-wrap gap-3">
+          <div v-for="player in store.players" :key="player.id" class="flex items-center gap-3 bg-slate-900/60 border border-slate-800 rounded-xl px-4 py-2 hover:bg-slate-800/60 transition-colors">
+            <div class="flex items-center gap-2">
               <span :class="['w-2 h-2 rounded-full flex-shrink-0', player.is_connected ? 'bg-emerald-500' : 'bg-rose-500']"></span>
-              <span class="font-bold text-sm text-slate-300 truncate">{{ player.name }}</span>
-              <span v-if="player.is_bot" class="text-[9px] bg-cyan-500/20 text-cyan-400 border border-cyan-500/30 px-1 py-0.5 rounded font-extrabold uppercase tracking-wider flex-shrink-0">Bot</span>
-              <span v-if="player.name === store.session?.host_name" class="text-[9px] bg-yellow-500/20 text-yellow-400 border border-yellow-500/30 px-1 py-0.5 rounded font-extrabold uppercase tracking-wider flex-shrink-0">Hôte</span>
+              <span class="font-bold text-sm text-slate-300">{{ player.name }}</span>
+              <span v-if="player.is_bot" class="text-[9px] bg-cyan-500/20 text-cyan-400 border border-cyan-500/30 px-1 py-0.5 rounded font-extrabold uppercase tracking-wider">Bot</span>
+              <span v-if="player.name === store.session?.host_name" class="text-[9px] bg-yellow-500/20 text-yellow-400 border border-yellow-500/30 px-1 py-0.5 rounded font-extrabold uppercase tracking-wider">Hôte</span>
             </div>
             
-            <div class="flex items-center gap-2">
-              <!-- Count tracker -->
+            <div class="flex items-center gap-2 border-l border-slate-700 pl-3">
               <span class="text-xs font-mono font-bold text-slate-400">
-                {{ getPlayerMusicCount(player.id) }} / {{ store.session?.max_musics_per_player || 2 }}
+                {{ getPlayerMusicCount(player.id) }}/{{ store.session?.max_musics_per_player || 2 }}
               </span>
-              <!-- Ready Badge -->
-              <span v-if="getPlayerMusicCount(player.id) >= (store.session?.max_musics_per_player || 2)" class="text-[10px] bg-emerald-500/10 text-emerald-400 px-1.5 py-0.5 rounded border border-emerald-500/20 font-bold uppercase">Prêt</span>
-              <span v-else class="text-[10px] bg-slate-900 text-slate-500 px-1.5 py-0.5 rounded border border-slate-800 font-bold uppercase">En cours</span>
-              
-              <!-- Host Actions -->
-              <div v-if="isHost && player.id !== store.player?.id" class="flex gap-1 border-l border-slate-800 pl-2 ml-1">
-                <!-- Promote to Host -->
-                <button v-if="!player.is_bot" @click="promotePlayer(player.id)" title="Promouvoir Hôte" class="p-1 rounded bg-yellow-500/10 hover:bg-yellow-500/20 border border-yellow-500/20 text-yellow-400 transition-all">
-                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-3 h-3">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 11.25l-3-3m0 0l-3 3m3-3v11.25M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                </button>
-                <!-- Kick Player -->
-                <button @click="kickPlayer(player.id)" title="Kick du salon" class="p-1 rounded bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/20 text-rose-400 transition-all">
-                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-3 h-3">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                </button>
-              </div>
+              <span v-if="getPlayerMusicCount(player.id) >= (store.session?.max_musics_per_player || 2)" class="text-emerald-400 flex items-center justify-center">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-4 h-4"><path fill-rule="evenodd" d="M19.916 4.626a.75.75 0 0 1 .208 1.04l-9 13.5a.75.75 0 0 1-1.154.114l-6-6a.75.75 0 0 1 1.06-1.06l5.353 5.353 8.493-12.74a.75.75 0 0 1 1.04-.207Z" clip-rule="evenodd" /></svg>
+              </span>
+            </div>
+            
+            <!-- Host Actions -->
+            <div v-if="isHost && player.id !== store.player?.id" class="flex gap-1.5 border-l border-slate-700 pl-3 ml-1">
+              <button v-if="!player.is_bot" @click="promotePlayer(player.id)" title="Promouvoir Hôte" class="text-yellow-500 hover:text-yellow-400 transition-colors">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-4 h-4"><path fill-rule="evenodd" d="M10 2a.75.75 0 0 1 .75.75v1.5a.75.75 0 0 1-1.5 0v-1.5A.75.75 0 0 1 10 2ZM10 15a.75.75 0 0 1 .75.75v1.5a.75.75 0 0 1-1.5 0v-1.5A.75.75 0 0 1 10 15ZM10 7a3 3 0 1 0 0 6 3 3 0 0 0 0-6ZM15.657 5.404a.75.75 0 1 0-1.06-1.06l-1.061 1.06a.75.75 0 0 0 1.06 1.06l1.06-1.06ZM6.464 14.596a.75.75 0 1 0-1.06-1.06l-1.06 1.06a.75.75 0 0 0 1.06 1.06l1.06-1.06ZM18 10a.75.75 0 0 1-.75.75h-1.5a.75.75 0 0 1 0-1.5h1.5A.75.75 0 0 1 18 10ZM5 10a.75.75 0 0 1-.75.75h-1.5a.75.75 0 0 1 0-1.5h1.5A.75.75 0 0 1 5 10ZM14.596 15.657a.75.75 0 0 0 1.06-1.06l-1.06-1.061a.75.75 0 1 0-1.06 1.06l1.06 1.06ZM5.404 6.464a.75.75 0 0 0 1.06-1.06l-1.06-1.06a.75.75 0 1 0-1.06 1.06l1.06 1.06Z" clip-rule="evenodd" /></svg>
+              </button>
+              <button @click="kickPlayer(player.id)" title="Kick du salon" class="text-rose-500 hover:text-rose-400 transition-colors">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-4 h-4"><path fill-rule="evenodd" d="M8.75 1A2.75 2.75 0 0 0 6 3.75v.443c-.795.077-1.584.176-2.365.298a.75.75 0 1 0 .23 1.482l.149-.022.841 10.518A2.75 2.75 0 0 0 7.596 19h4.807a2.75 2.75 0 0 0 2.742-2.53l.841-10.52.149.023a.75.75 0 0 0 .23-1.482A41.03 41.03 0 0 0 14 4.193V3.75A2.75 2.75 0 0 0 11.25 1h-2.5ZM10 4c.84 0 1.673.025 2.5.075V3.75c0-.69-.56-1.25-1.25-1.25h-2.5c-.69 0-1.25.56-1.25 1.25v.325C8.327 4.025 9.16 4 10 4ZM8.58 7.72a.75.75 0 0 0-1.5.06l.3 7.5a.75.75 0 1 0 1.5-.06l-.3-7.5Zm4.34.06a.75.75 0 1 0-1.5-.06l-.3 7.5a.75.75 0 1 0 1.5.06l.3-7.5Z" clip-rule="evenodd" /></svg>
+              </button>
             </div>
           </div>
         </div>
