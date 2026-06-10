@@ -581,6 +581,9 @@ export default class GameService {
     
     const music = await Music.findById(musicId);
     if (!music || music.session_id !== session.id) throw new Error('Musique introuvable');
+    if (music.player_id === playerId) {
+      throw new Error('Vous ne pouvez pas participer au blind test pour votre propre musique');
+    }
     
     const isCorrect = music.title === answerTitle && music.artist === answerArtist;
     

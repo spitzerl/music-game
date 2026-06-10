@@ -143,7 +143,7 @@
             <div v-if="store.session?.enable_blind_test && blindTestResult" :class="['z-10 mt-2 px-5 py-2 rounded-xl border text-sm font-black uppercase tracking-wider shadow-lg', blindTestResult.is_correct ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/40' : 'bg-rose-500/20 text-rose-400 border-rose-500/40']">
               Blind Test : {{ blindTestResult.is_correct ? '✓ Trouvé (+1 pt)' : '✗ Incorrect' }}
             </div>
-            <div v-else-if="store.session?.enable_blind_test && !isObserver" class="z-10 mt-2 px-5 py-2 rounded-xl border text-sm font-black uppercase tracking-wider bg-slate-800/50 text-slate-400 border-slate-700 shadow-lg">
+            <div v-else-if="store.session?.enable_blind_test && !isObserver && !isProposer" class="z-10 mt-2 px-5 py-2 rounded-xl border text-sm font-black uppercase tracking-wider bg-slate-800/50 text-slate-400 border-slate-700 shadow-lg">
               Blind Test : Aucune réponse
             </div>
           </div>
@@ -248,10 +248,12 @@
           <p class="text-sm text-slate-400 font-bold">Préparez-vous à voter pour le proposeur...</p>
         </div>
 
-        <!-- Listening Lock Info or Blind Test -->
         <div v-else-if="status === 'listening'" class="h-full flex flex-col justify-center">
           <div v-if="!store.session?.enable_blind_test" class="text-center text-slate-500 italic text-sm">
             Les options de vote apparaîtront dès la fin de l'écoute.
+          </div>
+          <div v-else-if="isProposer" class="text-center py-4 bg-purple-500/10 border border-purple-500/20 p-4 rounded-xl text-purple-400 font-medium text-sm">
+            📢 C'est votre morceau ! Vous ne participez pas au Blind Test.
           </div>
           <div v-else-if="!isObserver" class="flex flex-col h-full space-y-4 pt-4">
             <p class="text-xs font-semibold text-cyan-400 uppercase tracking-wider mb-2 text-center flex-shrink-0">Blind Test : Quel est ce morceau ?</p>
