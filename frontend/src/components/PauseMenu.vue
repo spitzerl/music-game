@@ -228,6 +228,7 @@ const confirmLeave = () => {
   if (confirm(msg)) {
     store.leaveSession();
     closeMenu();
+    router.push('/');
   }
 };
 
