@@ -192,7 +192,7 @@
             <TransitionGroup
               name="list"
               tag="div"
-              class="grid sm:grid-cols-2 gap-4 overflow-y-auto pr-2 pb-2"
+              class="grid sm:grid-cols-2 gap-4 overflow-y-auto p-3 -mx-3"
             >
               <button
                 v-for="target in eligiblePlayers"
@@ -257,7 +257,7 @@
           </div>
           <div v-else-if="!isObserver" class="flex flex-col h-full space-y-4 pt-4">
             <p class="text-xs font-semibold text-cyan-400 uppercase tracking-wider mb-2 text-center flex-shrink-0">Blind Test : Quel est ce morceau ?</p>
-            <TransitionGroup name="list" tag="div" class="grid sm:grid-cols-2 gap-4 overflow-y-auto pr-2 pb-2">
+            <TransitionGroup name="list" tag="div" class="grid sm:grid-cols-2 gap-4 overflow-y-auto p-3 -mx-3">
               <button
                 v-for="(option, index) in blindTestOptions"
                 :key="index"
