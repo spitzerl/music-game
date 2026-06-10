@@ -117,7 +117,7 @@
         </div>
 
         <!-- Revelation Phase & Blind Test Revelation -->
-        <div v-else-if="status === 'revelation' || status === 'blindtest_revelation'" class="w-full flex-1 flex flex-col items-center justify-center py-2 relative">
+        <div v-else-if="status === 'revelation'" class="w-full flex-1 flex flex-col items-center justify-center py-2 relative">
           <!-- Glass Card Container -->
           <div class="relative w-full max-w-sm bg-slate-900/60 backdrop-blur-xl border border-slate-700/50 shadow-2xl rounded-3xl p-5 flex flex-col items-center text-center overflow-hidden">
             
@@ -238,16 +238,7 @@
           </div>
         </div>
 
-        <!-- Blind Test Revelation (Right column placeholder) -->
-        <div v-else-if="status === 'blindtest_revelation'" class="h-full flex flex-col justify-center items-center text-center space-y-4">
-          <div class="w-20 h-20 rounded-full bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center text-cyan-400 mb-2 animate-bounce">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-10 h-10">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
-            </svg>
-          </div>
-          <p class="text-xl font-black text-white uppercase tracking-wider">Fin du Blind Test</p>
-          <p class="text-sm text-slate-400 font-bold">Préparez-vous à voter pour le proposeur...</p>
-        </div>
+
 
         <div v-else-if="status === 'listening'" class="h-full flex flex-col justify-center">
           <div v-if="!store.session?.enable_blind_test" class="text-center text-slate-500 italic text-sm">
@@ -264,7 +255,7 @@
                 :key="index"
                 @click="submitBlindTestAnswer(option)"
                 :disabled="hasAnsweredBlindTest || isProposer"
-                :class="['p-4 rounded-2xl border text-left transition-all flex flex-col justify-center items-center text-center min-h-[80px]', isProposer ? 'opacity-50 cursor-not-allowed bg-slate-900/40 border-slate-800 text-slate-500' : (blindTestSelectedAnswer?.title === option.title && blindTestSelectedAnswer?.artist === option.artist ? 'bg-cyan-500/20 border-cyan-500 text-white shadow-md shadow-cyan-500/20 scale-105' : 'bg-slate-900/60 border-slate-800 text-slate-300 hover:border-slate-700 hover:text-white hover:scale-[1.02]'), !isProposer && hasAnsweredBlindTest && (blindTestSelectedAnswer?.title !== option.title || blindTestSelectedAnswer?.artist !== option.artist) ? 'opacity-50 cursor-not-allowed hover:border-slate-800 hover:text-slate-300 hover:scale-[1.0]' : '']"
+                :class="getBlindTestOptionClass(option)"
               >
                 <span class="font-extrabold text-sm md:text-base line-clamp-1 w-full">{{ option.title }}</span>
                 <span class="text-xs text-slate-400 line-clamp-1 w-full mt-1">{{ option.artist }}</span>
@@ -362,6 +353,36 @@ const submitBlindTestAnswer = async (option) => {
   } catch (err) {
     console.error("Failed to submit blind test answer:", err);
     blindTestSelectedAnswer.value = null; // Revert on error
+  }
+};
+
+const getBlindTestOptionClass = (option) => {
+  const baseClasses = 'p-4 rounded-2xl border text-left transition-all flex flex-col justify-center items-center text-center min-h-[80px]';
+  
+  if (isProposer.value) {
+    return `${baseClasses} opacity-50 cursor-not-allowed bg-slate-900/40 border-slate-800 text-slate-500`;
+  }
+  
+  if (!hasAnsweredBlindTest.value) {
+    return `${baseClasses} bg-slate-900/60 border-slate-800 text-slate-300 hover:border-slate-700 hover:text-white hover:scale-[1.02]`;
+  }
+  
+  // Has answered
+  const isSelected = blindTestSelectedAnswer.value?.title === option.title && blindTestSelectedAnswer.value?.artist === option.artist;
+  
+  if (isSelected) {
+    if (blindTestResult.value) {
+      if (blindTestResult.value.is_correct) {
+        return `${baseClasses} bg-emerald-500/20 border-emerald-500 text-emerald-400 shadow-md shadow-emerald-500/20 scale-105`;
+      } else {
+        return `${baseClasses} bg-rose-500/20 border-rose-500 text-rose-400 shadow-md shadow-rose-500/20 scale-105`;
+      }
+    }
+    // Optimistic state before server response
+    return `${baseClasses} bg-cyan-500/20 border-cyan-500 text-white shadow-md shadow-cyan-500/20 scale-105`;
+  } else {
+    // Unselected options after answering
+    return `${baseClasses} opacity-50 cursor-not-allowed bg-slate-900/40 border-slate-800 text-slate-500`;
   }
 };
 
