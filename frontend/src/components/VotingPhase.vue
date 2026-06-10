@@ -110,33 +110,33 @@
         </div>
 
         <!-- Revelation Phase & Blind Test Revelation -->
-        <div v-else-if="status === 'revelation' || status === 'blindtest_revelation'" class="w-full flex-1 flex flex-col items-center justify-center py-4 relative">
+        <div v-else-if="status === 'revelation' || status === 'blindtest_revelation'" class="w-full flex-1 flex flex-col items-center justify-center py-2 relative">
           <!-- Glass Card Container -->
-          <div class="relative w-full max-w-sm bg-slate-900/60 backdrop-blur-xl border border-slate-700/50 shadow-2xl rounded-3xl p-6 flex flex-col items-center text-center overflow-hidden">
+          <div class="relative w-full max-w-sm bg-slate-900/60 backdrop-blur-xl border border-slate-700/50 shadow-2xl rounded-3xl p-5 flex flex-col items-center text-center overflow-hidden">
             
             <!-- Glow Effect -->
             <div class="absolute inset-0 bg-gradient-to-br from-cyan-500/10 to-purple-500/10 pointer-events-none"></div>
 
             <!-- Large cover art -->
-            <div class="relative group mb-6 z-10">
-              <img v-if="store.currentMusic?.cover_url" :src="store.currentMusic.cover_url" class="w-48 h-48 rounded-2xl object-cover shadow-[0_10px_40px_rgba(0,0,0,0.5)] border border-slate-700/80 transition-transform duration-700 group-hover:scale-105 group-hover:-rotate-1" />
-              <div v-else class="w-48 h-48 rounded-2xl bg-gradient-to-tr from-cyan-500 to-purple-600 flex items-center justify-center text-white shadow-[0_10px_40px_rgba(0,0,0,0.5)] border border-slate-700/80">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-16 h-16 opacity-80">
+            <div class="relative group mb-4 z-10">
+              <img v-if="store.currentMusic?.cover_url" :src="store.currentMusic.cover_url" class="w-40 h-40 md:w-44 md:h-44 rounded-2xl object-cover shadow-[0_10px_30px_rgba(0,0,0,0.5)] border border-slate-700/80 transition-transform duration-700 group-hover:scale-105 group-hover:-rotate-1" />
+              <div v-else class="w-40 h-40 md:w-44 md:h-44 rounded-2xl bg-gradient-to-tr from-cyan-500 to-purple-600 flex items-center justify-center text-white shadow-[0_10px_30px_rgba(0,0,0,0.5)] border border-slate-700/80">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-14 h-14 opacity-80">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M9 9l10.5-3m0 0L21 8.25M19.5 6C19 6 13 12 13 12v6.75m0 0a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
                 </svg>
               </div>
             </div>
 
             <!-- Song info -->
-            <div class="z-10 w-full mb-4">
-              <h3 class="text-2xl font-black text-white leading-tight truncate max-w-full drop-shadow-md">{{ store.currentMusic?.title }}</h3>
-              <p class="text-base text-cyan-400/80 font-bold truncate max-w-full mt-1 drop-shadow">{{ store.currentMusic?.artist }}</p>
+            <div class="z-10 w-full mb-3">
+              <h3 class="text-xl md:text-2xl font-black text-white leading-tight truncate max-w-full drop-shadow-md">{{ store.currentMusic?.title }}</h3>
+              <p class="text-sm md:text-base text-cyan-400/80 font-bold truncate max-w-full mt-1 drop-shadow">{{ store.currentMusic?.artist }}</p>
             </div>
 
             <!-- Proposer (Only shown during revelation) -->
-            <div v-if="status === 'revelation'" class="z-10 w-full bg-slate-950/40 rounded-xl p-3 border border-slate-800/60 mb-4 flex flex-col items-center justify-center gap-1 shadow-inner">
+            <div v-if="status === 'revelation'" class="z-10 w-full bg-slate-950/40 rounded-xl p-2.5 border border-slate-800/60 mb-3 flex flex-col items-center justify-center gap-1 shadow-inner">
               <span class="text-[10px] text-yellow-500/80 uppercase font-black tracking-widest">Proposé par</span>
-              <span class="text-2xl font-black text-yellow-400 tracking-wide animate-pulse drop-shadow-md">{{ proposerName }}</span>
+              <span class="text-xl md:text-2xl font-black text-yellow-400 tracking-wide animate-pulse drop-shadow-md">{{ proposerName }}</span>
             </div>
 
             <!-- Blind Test Result for Current Player -->
@@ -169,7 +169,7 @@
       </section>
 
       <!-- Interactive Zone (Voting List or Revelation Details) -->
-      <section class="glass-panel p-6 rounded-2xl border border-slate-800 h-[500px] flex flex-col overflow-hidden">
+      <section class="glass-panel p-6 rounded-2xl border border-slate-800 h-[500px] md:h-[550px] flex flex-col overflow-hidden">
         <!-- Idle Zone Info -->
         <div v-if="status === 'idle'" class="h-full flex items-center justify-center text-center text-slate-500 italic text-sm">
           En attente du lancement de la manche par l'hôte...
