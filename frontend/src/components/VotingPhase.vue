@@ -146,12 +146,14 @@
               <span class="text-xl md:text-2xl font-black text-yellow-400 tracking-wide animate-pulse drop-shadow-md">{{ proposerName }}</span>
             </div>
 
-            <!-- Blind Test Result for Current Player -->
-            <div v-if="store.session?.enable_blind_test && blindTestResult" :class="['z-10 mt-2 px-5 py-2 rounded-xl border text-sm font-black uppercase tracking-wider shadow-lg', blindTestResult.is_correct ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/40' : 'bg-rose-500/20 text-rose-400 border-rose-500/40']">
-              Blind Test : {{ blindTestResult.is_correct ? '✓ Trouvé (+1 pt)' : '✗ Incorrect' }}
-            </div>
-            <div v-else-if="store.session?.enable_blind_test && !isObserver && !isProposer" class="z-10 mt-2 px-5 py-2 rounded-xl border text-sm font-black uppercase tracking-wider bg-slate-800/50 text-slate-400 border-slate-700 shadow-lg">
-              Blind Test : Aucune réponse
+            <!-- Personal Results -->
+            <div v-if="!isObserver && status === 'revelation'" class="z-10 w-full mt-2 flex flex-col gap-2">
+              <div v-if="store.session?.enable_blind_test && myBlindTestResult" :class="['px-5 py-2.5 rounded-xl border text-sm font-black uppercase tracking-wider shadow-lg', myBlindTestResult.statusClass]">
+                BLIND TEST : {{ myBlindTestResult.statusLabel }}
+              </div>
+              <div v-if="myVoteResult" :class="['px-5 py-2.5 rounded-xl border text-sm font-black uppercase tracking-wider shadow-lg', myVoteResult.statusClass]">
+                VOTE : {{ myVoteResult.statusLabel }}
+              </div>
             </div>
           </div>
 
@@ -513,6 +515,34 @@ const voteResults = computed(() => {
       statusClass
     };
   });
+});
+
+const myVoteResult = computed(() => {
+  if (!store.player) return null;
+  return voteResults.value.find(r => r.player.id === store.player.id) || null;
+});
+
+const myBlindTestResult = computed(() => {
+  if (!store.session?.enable_blind_test || !store.player) return null;
+  
+  let statusLabel = '';
+  let statusClass = '';
+  
+  if (isProposer.value) {
+    statusLabel = 'NE PARTICIPE PAS';
+    statusClass = 'bg-slate-500/20 text-slate-400 border-slate-500/30';
+  } else if (!blindTestResult.value) {
+    statusLabel = "N'a pas répondu";
+    statusClass = 'bg-rose-500/10 text-rose-400 border-rose-500/20';
+  } else if (blindTestResult.value.is_correct) {
+    statusLabel = '✓ Correct +1';
+    statusClass = 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20';
+  } else {
+    statusLabel = '✗ Incorrect';
+    statusClass = 'bg-rose-500/10 text-rose-400 border-rose-500/20';
+  }
+
+  return { statusLabel, statusClass };
 });
 
 const proposerName = computed(() => {
