@@ -59,6 +59,20 @@ async function initSchema() {
   `);
 
   await pool.query(`
+    CREATE TABLE IF NOT EXISTS blind_test_answers (
+      id SERIAL PRIMARY KEY,
+      session_id INTEGER NOT NULL REFERENCES sessions(id) ON DELETE CASCADE,
+      player_id INTEGER NOT NULL REFERENCES players(id) ON DELETE CASCADE,
+      music_id INTEGER NOT NULL REFERENCES musics(id) ON DELETE CASCADE,
+      answer_title VARCHAR(255) NOT NULL,
+      answer_artist VARCHAR(255) NOT NULL,
+      is_correct BOOLEAN NOT NULL DEFAULT FALSE,
+      created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+      UNIQUE (session_id, player_id, music_id)
+    )
+  `);
+
+  await pool.query(`
     ALTER TABLE sessions 
     ADD COLUMN IF NOT EXISTS max_musics_per_player INTEGER DEFAULT 3,
     ADD COLUMN IF NOT EXISTS selection_duration INTEGER DEFAULT 120,
@@ -70,7 +84,8 @@ async function initSchema() {
     ADD COLUMN IF NOT EXISTS voting_status VARCHAR(20) DEFAULT 'idle',
     ADD COLUMN IF NOT EXISTS timer_ends_at TIMESTAMP,
     ADD COLUMN IF NOT EXISTS auto_advance BOOLEAN DEFAULT FALSE,
-    ADD COLUMN IF NOT EXISTS show_vote_count BOOLEAN DEFAULT TRUE;
+    ADD COLUMN IF NOT EXISTS show_vote_count BOOLEAN DEFAULT TRUE,
+    ADD COLUMN IF NOT EXISTS enable_blind_test BOOLEAN DEFAULT FALSE;
   `);
 
   await pool.query(`
@@ -83,7 +98,8 @@ async function initSchema() {
   await pool.query(`
     ALTER TABLE musics
     ADD COLUMN IF NOT EXISTS play_order INTEGER DEFAULT -1,
-    ADD COLUMN IF NOT EXISTS cover_url TEXT;
+    ADD COLUMN IF NOT EXISTS cover_url TEXT,
+    ADD COLUMN IF NOT EXISTS blind_test_options JSONB;
   `);
 }
 

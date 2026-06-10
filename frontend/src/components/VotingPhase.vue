@@ -131,6 +131,11 @@
             <span class="text-3xl font-black text-yellow-400 tracking-wide animate-pulse">{{ proposerName }}</span>
           </div>
 
+          <!-- Blind Test Result for Current Player -->
+          <div v-if="store.session?.enable_blind_test && blindTestResult" :class="['mt-2 px-4 py-1.5 rounded-full border text-xs font-bold uppercase tracking-wider', blindTestResult.is_correct ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30' : 'bg-rose-500/20 text-rose-400 border-rose-500/30']">
+            Blind Test : {{ blindTestResult.is_correct ? '✓ Trouvé (+1 pt)' : '✗ Incorrect' }}
+          </div>
+
           <!-- Host: advance to next round -->
           <div v-if="isHost" class="mt-6">
             <button @click="advanceFromRevelation" class="glow-btn-purple bg-purple-600 hover:bg-purple-500 text-white font-extrabold py-3.5 px-8 rounded-2xl transition-all flex items-center gap-2.5 text-base shadow-lg active:scale-98">
@@ -220,9 +225,29 @@
           </div>
         </div>
 
-        <!-- Listening Lock Info -->
-        <div v-else-if="status === 'listening'" class="h-full flex items-center justify-center text-center text-slate-500 italic text-sm">
-          Les options de vote apparaîtront dès la fin de l'écoute.
+        <!-- Listening Lock Info or Blind Test -->
+        <div v-else-if="status === 'listening'" class="h-full flex flex-col justify-center">
+          <div v-if="!store.session?.enable_blind_test" class="text-center text-slate-500 italic text-sm">
+            Les options de vote apparaîtront dès la fin de l'écoute.
+          </div>
+          <div v-else-if="!isObserver" class="flex flex-col h-full space-y-4 pt-4">
+            <p class="text-xs font-semibold text-cyan-400 uppercase tracking-wider mb-2 text-center flex-shrink-0">Blind Test : Quel est ce morceau ?</p>
+            <TransitionGroup name="list" tag="div" class="grid sm:grid-cols-2 gap-4 overflow-y-auto pr-2 pb-2">
+              <button
+                v-for="(option, index) in blindTestOptions"
+                :key="index"
+                @click="submitBlindTestAnswer(option)"
+                :disabled="hasAnsweredBlindTest"
+                :class="['p-4 rounded-2xl border text-left transition-all flex flex-col justify-center items-center text-center min-h-[80px]', blindTestSelectedAnswer?.title === option.title && blindTestSelectedAnswer?.artist === option.artist ? 'bg-cyan-500/20 border-cyan-500 text-white shadow-md shadow-cyan-500/20 scale-105' : 'bg-slate-900/60 border-slate-800 text-slate-300 hover:border-slate-700 hover:text-white hover:scale-[1.02]', hasAnsweredBlindTest && (blindTestSelectedAnswer?.title !== option.title || blindTestSelectedAnswer?.artist !== option.artist) ? 'opacity-50 cursor-not-allowed hover:border-slate-800 hover:text-slate-300 hover:scale-[1.0]' : '']"
+              >
+                <span class="font-extrabold text-sm md:text-base line-clamp-1 w-full">{{ option.title }}</span>
+                <span class="text-xs text-slate-400 line-clamp-1 w-full mt-1">{{ option.artist }}</span>
+              </button>
+            </TransitionGroup>
+          </div>
+          <div v-else class="text-center text-slate-500 italic text-sm">
+            Mode Blind Test en cours pour les joueurs...
+          </div>
         </div>
       </section>
     </main>
@@ -283,6 +308,36 @@ let timerInterval = null;
 // Local Player State
 const selectedVoteId = ref(null);
 const volume = ref(localStorage.getItem('cekikilami_volume') ? Number(localStorage.getItem('cekikilami_volume')) : 0.5);
+
+// Blind Test State
+const blindTestSelectedAnswer = ref(null);
+const hasAnsweredBlindTest = computed(() => blindTestSelectedAnswer.value !== null);
+
+const blindTestOptions = computed(() => {
+  if (!store.currentMusic || !store.currentMusic.blind_test_options) return [];
+  try {
+    return typeof store.currentMusic.blind_test_options === 'string' ? JSON.parse(store.currentMusic.blind_test_options) : store.currentMusic.blind_test_options;
+  } catch (e) {
+    return [];
+  }
+});
+
+const blindTestResult = computed(() => {
+  if (!store.currentMusic || !store.currentMusic.blind_test_answers || !store.player) return null;
+  const answer = store.currentMusic.blind_test_answers.find(a => a.player_id === store.player.id);
+  return answer || null;
+});
+
+const submitBlindTestAnswer = async (option) => {
+  if (isObserver.value || status.value !== 'listening' || hasAnsweredBlindTest.value) return;
+  blindTestSelectedAnswer.value = option;
+  try {
+    await store.submitBlindTestAnswer(store.currentMusic.id, option.title, option.artist);
+  } catch (err) {
+    console.error("Failed to submit blind test answer:", err);
+    blindTestSelectedAnswer.value = null; // Revert on error
+  }
+};
 
 // Audio State
 let audio = null;
@@ -489,6 +544,7 @@ onUnmounted(() => {
 // Watch current music to reload audio
 watch(() => store.currentMusic?.id, () => {
   selectedVoteId.value = null; // reset vote selection for next track
+  blindTestSelectedAnswer.value = null; // reset blind test selection
   startAudio();
 });
 

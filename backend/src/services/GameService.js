@@ -293,10 +293,45 @@ export default class GameService {
     const shuffledMusics = activeMusics.sort(() => Math.random() - 0.5);
     for (let i = 0; i < shuffledMusics.length; i++) {
       await Music.updatePlayOrder(shuffledMusics[i].id, i);
+      
+      // If blind test is enabled, generate options
+      if (session.enable_blind_test) {
+        try {
+          const track = shuffledMusics[i];
+          const searchUrl = `https://api.deezer.com/search?q=artist:"${encodeURIComponent(track.artist)}"&limit=10`;
+          const response = await fetch(searchUrl);
+          let options = [];
+          if (response.ok) {
+            const payload = await response.json();
+            const results = payload?.data || [];
+            // Filter out the exact track
+            const filtered = results.filter(r => r.title.toLowerCase() !== track.title.toLowerCase());
+            // Pick 3 random
+            const randomTracks = filtered.sort(() => Math.random() - 0.5).slice(0, 3);
+            options = randomTracks.map(r => ({ title: r.title, artist: r.artist.name }));
+          }
+          // If we couldn't find 3, just add some dummy data or whatever we have
+          while (options.length < 3) {
+             const fallback = BOT_TRACKS[Math.floor(Math.random() * BOT_TRACKS.length)];
+             if (fallback.title !== track.title && !options.some(o => o.title === fallback.title)) {
+               options.push({ title: fallback.title, artist: fallback.artist });
+             }
+          }
+          // Add the correct one
+          options.push({ title: track.title, artist: track.artist });
+          // Shuffle
+          options.sort(() => Math.random() - 0.5);
+          
+          await query('UPDATE musics SET blind_test_options = $1 WHERE id = $2', [JSON.stringify(options), track.id]);
+        } catch (err) {
+          this.log(code, `Failed to generate blind test options for music ${shuffledMusics[i].id}: ${err.message}`);
+        }
+      }
     }
 
     // Clear previous votes
     await query('DELETE FROM votes WHERE session_id = $1', [session.id]);
+    await query('DELETE FROM blind_test_answers WHERE session_id = $1', [session.id]);
 
     await Session.updatePhase(code, 'voting');
 
@@ -518,6 +553,35 @@ export default class GameService {
     return this.getState(code, voterId);
   }
 
+  async submitBlindTestAnswer(code, playerId, musicId, answerTitle, answerArtist) {
+    const session = await Session.findByCode(code);
+    if (!session || session.phase !== 'voting' || session.voting_status !== 'listening' || !session.enable_blind_test) {
+      throw new Error('Action non autorisée');
+    }
+    
+    // Check if player is an observer
+    const players = await Player.findBySession(session.id);
+    const player = players.find(p => p.id === playerId);
+    if (!player || player.is_observer) throw new Error('Action non autorisée');
+    
+    const music = await Music.findById(musicId);
+    if (!music || music.session_id !== session.id) throw new Error('Musique introuvable');
+    
+    const isCorrect = music.title === answerTitle && music.artist === answerArtist;
+    
+    await query(
+      `INSERT INTO blind_test_answers (session_id, player_id, music_id, answer_title, answer_artist, is_correct)
+       VALUES ($1, $2, $3, $4, $5, $6)
+       ON CONFLICT (session_id, player_id, music_id) DO UPDATE SET answer_title = EXCLUDED.answer_title, answer_artist = EXCLUDED.answer_artist, is_correct = EXCLUDED.is_correct`,
+      [session.id, playerId, musicId, answerTitle, answerArtist, isCorrect]
+    );
+    
+    this.log(code, `Blind test answer submitted: player ${playerId} answered ${answerTitle} for music ${musicId}`);
+
+    await this.broadcastState(code);
+    return this.getState(code, playerId);
+  }
+
   async finishSession(code) {
     const session = await Session.findByCode(code);
     if (!session) {
@@ -574,6 +638,7 @@ export default class GameService {
     const players = await Player.findBySession(session.id);
     const rawMusics = await Music.findBySession(session.id);
     const votes = await query('SELECT * FROM votes WHERE session_id = $1', [session.id]).then(res => res.rows);
+    const blindTestAnswers = await query('SELECT * FROM blind_test_answers WHERE session_id = $1', [session.id]).then(res => res.rows);
 
     // Compute dynamic scores
     const playerMap = new Map(players.map(p => [p.id, {
@@ -602,6 +667,18 @@ export default class GameService {
         const voter = playerMap.get(vote.voter_id);
         if (voter) {
           voter.correctGuesses += 1;
+        }
+      }
+    }
+
+    // Add blind test scores
+    if (session.enable_blind_test) {
+      for (const answer of blindTestAnswers) {
+        if (answer.is_correct) {
+          const player = playerMap.get(answer.player_id);
+          if (player) {
+            player.correctGuesses += 1;
+          }
         }
       }
     }
@@ -660,6 +737,20 @@ export default class GameService {
 
         // Return votes for the current track
         const currentVotes = votes.filter(v => v.music_id === currentMusic.id);
+        const currentBlindTestAnswers = blindTestAnswers.filter(b => b.music_id === currentMusic.id);
+        
+        if (session.enable_blind_test) {
+          currentMusic.blind_test_answers = currentBlindTestAnswers;
+          // Hide other players' answers unless revelation
+          if (session.voting_status === 'listening' || session.voting_status === 'voting') {
+             const parsedPlayerId = playerId ? Number.parseInt(playerId, 10) : null;
+             if (parsedPlayerId) {
+                currentMusic.blind_test_answers = currentBlindTestAnswers.filter(b => b.player_id === parsedPlayerId);
+             } else {
+                currentMusic.blind_test_answers = [];
+             }
+          }
+        }
         
         if (session.voting_status === 'voting') {
           // During voting, return vote counts received by each player, but mask who voted for whom

@@ -257,6 +257,27 @@ export default function buildRoutes(gameService, ioNamespace) {
     }
   });
 
+  router.post('/sessions/:code/blind-test-answers', async (req, res, next) => {
+    try {
+      const code = requireNonEmptyString(req.params.code, 'code').toUpperCase();
+      const playerId = Number.parseInt(req.body?.playerId, 10);
+      const musicId = Number.parseInt(req.body?.musicId, 10);
+      const answerTitle = requireNonEmptyString(req.body?.answerTitle, 'answerTitle');
+      const answerArtist = requireNonEmptyString(req.body?.answerArtist, 'answerArtist');
+
+      if (Number.isNaN(playerId) || Number.isNaN(musicId)) {
+        const error = new Error('Les identifiants playerId et musicId sont requis et doivent être des entiers');
+        error.status = 400;
+        throw error;
+      }
+
+      const state = await gameService.submitBlindTestAnswer(code, playerId, musicId, answerTitle, answerArtist);
+      res.json(state);
+    } catch (error) {
+      next(error);
+    }
+  });
+
   router.post('/sessions/:code/finish', async (req, res, next) => {
     try {
       const code = requireNonEmptyString(req.params.code, 'code').toUpperCase();

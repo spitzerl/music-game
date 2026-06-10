@@ -50,6 +50,9 @@ export default {
   submitVote(code, payload) {
     return api.post(`/sessions/${code}/votes`, payload);
   },
+  submitBlindTestAnswer(code, payload) {
+    return api.post(`/sessions/${code}/blind-test-answers`, payload);
+  },
   getResults(code) {
     return api.get(`/sessions/${code}/results`);
   },

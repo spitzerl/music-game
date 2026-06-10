@@ -197,6 +197,23 @@
             </label>
           </div>
 
+          <!-- Enable Blind Test -->
+          <div class="flex items-center justify-between py-2 border-b border-slate-800/80">
+            <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider pr-4">Blind Test QCM (+1 pt)</span>
+            <label class="switch-container">
+              <input 
+                type="checkbox" 
+                v-model="config.enableBlindTest" 
+                :disabled="!isHost" 
+                @change="saveConfig" 
+                class="switch-input" 
+              />
+              <span class="switch-track">
+                <span class="switch-thumb"></span>
+              </span>
+            </label>
+          </div>
+
           <!-- Max Players -->
           <div>
             <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Limite de joueurs</label>
@@ -345,7 +362,8 @@ const config = reactive({
   showAnswers: true,
   maxPlayers: 8,
   autoAdvance: false,
-  showVoteCount: true
+  showVoteCount: true,
+  enableBlindTest: false
 });
 
 const isHost = computed(() => {
@@ -363,6 +381,7 @@ const loadAndSyncConfig = async () => {
     config.maxPlayers = store.session.max_players;
     config.autoAdvance = store.session.auto_advance;
     config.showVoteCount = store.session.show_vote_count;
+    config.enableBlindTest = store.session.enable_blind_test;
   }
 };
 
@@ -405,6 +424,7 @@ watch(() => store.session, (newSession) => {
     config.maxPlayers = newSession.max_players;
     config.autoAdvance = newSession.auto_advance;
     config.showVoteCount = newSession.show_vote_count;
+    config.enableBlindTest = newSession.enable_blind_test;
     
     // Redirect if phase is already started
     if (newSession.phase === 'selection') {
@@ -440,7 +460,8 @@ const saveConfig = async () => {
       showAnswers: config.showAnswers,
       maxPlayers: config.maxPlayers,
       autoAdvance: config.autoAdvance,
-      showVoteCount: config.showVoteCount
+      showVoteCount: config.showVoteCount,
+      enableBlindTest: config.enableBlindTest
     });
   } catch (err) {
     console.error("Failed to update config:", err);

@@ -104,6 +104,20 @@ export const useGameStore = defineStore('game', {
       this.votes = data.votes || null;
       return data;
     },
+    async submitBlindTestAnswer(musicId, answerTitle, answerArtist) {
+      if (!this.session || !this.player) return;
+      const { data } = await apiService.submitBlindTestAnswer(this.session.code, {
+        playerId: this.player.id,
+        musicId,
+        answerTitle,
+        answerArtist,
+      });
+      this.session = data.session;
+      this.players = data.players;
+      this.currentMusic = data.currentMusic || null;
+      this.votes = data.votes || null;
+      return data;
+    },
     async loadResults(code) {
       const { data } = await apiService.getResults(code);
       this.ranking = data.ranking;
