@@ -343,7 +343,7 @@ const resetMockGame = () => {
 
 onMounted(async () => {
   try {
-    const res = await api.get('/deezer/search');
+    const res = await api.searchDeezer();
     const tracks = res.data.tracks;
     if (tracks && tracks.length > 0) {
       mockTrack.value = tracks[Math.floor(Math.random() * tracks.length)];
