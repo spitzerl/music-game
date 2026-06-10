@@ -109,36 +109,48 @@
           </div>
         </div>
 
-        <!-- Revelation Phase -->
-        <div v-else-if="status === 'revelation'" class="w-full py-4 flex flex-col items-center">
-          <!-- Large cover art -->
-          <div class="relative group mb-5">
-            <img v-if="store.currentMusic?.cover_url" :src="store.currentMusic.cover_url" class="w-44 h-44 rounded-2xl object-cover shadow-2xl border border-slate-800 transition-transform duration-500 group-hover:scale-105" />
-            <div v-else class="w-44 h-44 rounded-2xl bg-gradient-to-tr from-cyan-500 to-purple-600 flex items-center justify-center text-white shadow-2xl border border-slate-800">
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-16 h-16 opacity-80">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M9 9l10.5-3m0 0L21 8.25M19.5 6C19 6 13 12 13 12v6.75m0 0a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
-              </svg>
+        <!-- Revelation Phase & Blind Test Revelation -->
+        <div v-else-if="status === 'revelation' || status === 'blindtest_revelation'" class="w-full flex-1 flex flex-col items-center justify-center py-4 relative">
+          <!-- Glass Card Container -->
+          <div class="relative w-full max-w-sm bg-slate-900/60 backdrop-blur-xl border border-slate-700/50 shadow-2xl rounded-3xl p-6 flex flex-col items-center text-center overflow-hidden">
+            
+            <!-- Glow Effect -->
+            <div class="absolute inset-0 bg-gradient-to-br from-cyan-500/10 to-purple-500/10 pointer-events-none"></div>
+
+            <!-- Large cover art -->
+            <div class="relative group mb-6 z-10">
+              <img v-if="store.currentMusic?.cover_url" :src="store.currentMusic.cover_url" class="w-48 h-48 rounded-2xl object-cover shadow-[0_10px_40px_rgba(0,0,0,0.5)] border border-slate-700/80 transition-transform duration-700 group-hover:scale-105 group-hover:-rotate-1" />
+              <div v-else class="w-48 h-48 rounded-2xl bg-gradient-to-tr from-cyan-500 to-purple-600 flex items-center justify-center text-white shadow-[0_10px_40px_rgba(0,0,0,0.5)] border border-slate-700/80">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-16 h-16 opacity-80">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M9 9l10.5-3m0 0L21 8.25M19.5 6C19 6 13 12 13 12v6.75m0 0a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+                </svg>
+              </div>
+            </div>
+
+            <!-- Song info -->
+            <div class="z-10 w-full mb-4">
+              <h3 class="text-2xl font-black text-white leading-tight truncate max-w-full drop-shadow-md">{{ store.currentMusic?.title }}</h3>
+              <p class="text-base text-cyan-400/80 font-bold truncate max-w-full mt-1 drop-shadow">{{ store.currentMusic?.artist }}</p>
+            </div>
+
+            <!-- Proposer (Only shown during revelation) -->
+            <div v-if="status === 'revelation'" class="z-10 w-full bg-slate-950/40 rounded-xl p-3 border border-slate-800/60 mb-4 flex flex-col items-center justify-center gap-1 shadow-inner">
+              <span class="text-[10px] text-yellow-500/80 uppercase font-black tracking-widest">Proposé par</span>
+              <span class="text-2xl font-black text-yellow-400 tracking-wide animate-pulse drop-shadow-md">{{ proposerName }}</span>
+            </div>
+
+            <!-- Blind Test Result for Current Player -->
+            <div v-if="store.session?.enable_blind_test && blindTestResult" :class="['z-10 mt-2 px-5 py-2 rounded-xl border text-sm font-black uppercase tracking-wider shadow-lg', blindTestResult.is_correct ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/40' : 'bg-rose-500/20 text-rose-400 border-rose-500/40']">
+              Blind Test : {{ blindTestResult.is_correct ? '✓ Trouvé (+1 pt)' : '✗ Incorrect' }}
+            </div>
+            <div v-else-if="store.session?.enable_blind_test && !isObserver" class="z-10 mt-2 px-5 py-2 rounded-xl border text-sm font-black uppercase tracking-wider bg-slate-800/50 text-slate-400 border-slate-700 shadow-lg">
+              Blind Test : Aucune réponse
             </div>
           </div>
 
-          <!-- Song info -->
-          <h3 class="text-2xl font-extrabold text-white leading-snug truncate max-w-full">{{ store.currentMusic?.title }}</h3>
-          <p class="text-base text-slate-400 font-medium truncate max-w-full mt-1.5 mb-6">{{ store.currentMusic?.artist }}</p>
-
-          <!-- Proposer -->
-          <div class="flex flex-col items-center justify-center gap-1">
-            <span class="text-xs text-yellow-500/80 uppercase font-black tracking-widest">Proposé par</span>
-            <span class="text-3xl font-black text-yellow-400 tracking-wide animate-pulse">{{ proposerName }}</span>
-          </div>
-
-          <!-- Blind Test Result for Current Player -->
-          <div v-if="store.session?.enable_blind_test && blindTestResult" :class="['mt-2 px-4 py-1.5 rounded-full border text-xs font-bold uppercase tracking-wider', blindTestResult.is_correct ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30' : 'bg-rose-500/20 text-rose-400 border-rose-500/30']">
-            Blind Test : {{ blindTestResult.is_correct ? '✓ Trouvé (+1 pt)' : '✗ Incorrect' }}
-          </div>
-
-          <!-- Host: advance to next round -->
-          <div v-if="isHost" class="mt-6">
-            <button @click="advanceFromRevelation" class="glow-btn-purple bg-purple-600 hover:bg-purple-500 text-white font-extrabold py-3.5 px-8 rounded-2xl transition-all flex items-center gap-2.5 text-base shadow-lg active:scale-98">
+          <!-- Host: advance to next round (Only in revelation) -->
+          <div v-if="isHost && status === 'revelation'" class="mt-6 z-10">
+            <button @click="advanceFromRevelation" class="glow-btn-purple bg-purple-600 hover:bg-purple-500 text-white font-extrabold py-3.5 px-8 rounded-2xl transition-all flex items-center gap-2.5 text-base shadow-[0_0_20px_rgba(147,51,234,0.4)] active:scale-98">
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-5 h-5">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M3 8.689c0-.864.933-1.406 1.683-.977l7.108 4.061a1.125 1.125 0 0 1 0 1.954l-7.108 4.061A1.125 1.125 0 0 1 3 16.811V8.69ZM12.75 8.689c0-.864.933-1.406 1.683-.977l7.108 4.061a1.125 1.125 0 0 1 0 1.954l-7.108 4.061a1.125 1.125 0 0 1-1.683-.977V8.69Z" />
               </svg>
@@ -225,21 +237,15 @@
           </div>
         </div>
 
-        <!-- Blind Test Revelation -->
+        <!-- Blind Test Revelation (Right column placeholder) -->
         <div v-else-if="status === 'blindtest_revelation'" class="h-full flex flex-col justify-center items-center text-center space-y-4">
-          <p class="text-xs font-semibold text-cyan-400 uppercase tracking-wider mb-2">Fin du Blind Test</p>
-          <div class="text-2xl font-black text-white">
-            {{ store.currentMusic?.title }}
+          <div class="w-20 h-20 rounded-full bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center text-cyan-400 mb-2 animate-bounce">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-10 h-10">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+            </svg>
           </div>
-          <div class="text-lg font-bold text-slate-400 mb-4">
-            {{ store.currentMusic?.artist }}
-          </div>
-          <div v-if="!isObserver && blindTestResult" :class="['mt-2 px-6 py-2 rounded-full border text-sm font-bold uppercase tracking-wider', blindTestResult.is_correct ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30' : 'bg-rose-500/20 text-rose-400 border-rose-500/30']">
-            {{ blindTestResult.is_correct ? '✓ Trouvé (+1 pt)' : '✗ Incorrect' }}
-          </div>
-          <div v-else-if="!isObserver" class="mt-2 px-6 py-2 rounded-full border text-sm font-bold uppercase tracking-wider bg-slate-800/50 text-slate-400 border-slate-700">
-            Pas de réponse
-          </div>
+          <p class="text-xl font-black text-white uppercase tracking-wider">Fin du Blind Test</p>
+          <p class="text-sm text-slate-400 font-bold">Préparez-vous à voter pour le proposeur...</p>
         </div>
 
         <!-- Listening Lock Info or Blind Test -->
