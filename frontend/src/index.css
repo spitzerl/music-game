@@ -206,6 +206,18 @@ h1, h2, h3, h4, h5, h6 {
   border-radius: var(--r-md);
 }
 
+/* Small variant */
+.btn-sm {
+  min-height: 36px !important;
+  height: 36px;
+  font-size: 0.8125rem;
+  padding: 0.375rem 0.875rem;
+  border-radius: var(--r-md);
+}
+.btn-sm.btn-icon {
+  width: 36px;
+}
+
 /* Legacy compat aliases */
 .glow-btn      { @apply btn btn-accent; }
 .glow-btn-purple { @apply btn btn-secondary; }

@@ -83,13 +83,13 @@
                 <div class="flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
                   <button type="button" @click="togglePreview(track)"
                     :aria-label="previewUrl===track.preview && isPlaying ? 'Mettre en pause' : `Écouter ${track.title}`"
-                    class="btn btn-ghost btn-icon" style="width:36px;height:36px">
+                    class="btn btn-ghost btn-sm btn-icon">
                     <i v-if="previewUrl===track.preview && isPlaying" class="fa-solid fa-pause text-[14px]"></i>
                     <i v-else class="fa-solid fa-play text-[14px]"></i>
                   </button>
                   <button type="button" @click="chooseTrack(track)"
                     :aria-label="`Choisir ${track.title}`"
-                    class="btn btn-primary text-xs px-2.5 sm:px-3" style="min-height:36px">
+                    class="btn btn-primary btn-sm px-2.5 sm:px-3">
                     Choisir
                   </button>
                 </div>
@@ -135,7 +135,7 @@
               </div>
               <button @click="deleteSubmittedMusic(music.id)"
                 :aria-label="`Supprimer ${music.title}`"
-                class="btn btn-icon flex-shrink-0" style="width:36px;height:36px;background:var(--clr-danger-dim);border:1px solid rgba(244,63,94,.25);color:#fda4af;border-radius:var(--r-md)">
+                class="btn btn-danger btn-sm btn-icon flex-shrink-0">
                 <i class="fa-solid fa-trash-can text-[14px]"></i>
               </button>
             </div>
