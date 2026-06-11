@@ -1035,6 +1035,21 @@ export default class GameService {
     await this.broadcastState(code);
     return this.getState(code, requesterId);
   }
+  async regenerateAvatar(code, playerId) {
+    const session = await Session.findByCode(code);
+    if (!session) throw new Error('Session introuvable');
+
+    const newSeed = Math.random().toString(36).substring(2, 10) + Date.now().toString(36);
+    const updatedPlayer = await Player.updateAvatarSeed(playerId, newSeed);
+    
+    if (!updatedPlayer) {
+      throw new Error('Joueur introuvable');
+    }
+
+    this.log(code, `Player ${updatedPlayer.name} regenerated avatar`);
+    await this.broadcastState(code);
+    return this.getState(code, playerId);
+  }
 
   async recoverSessions() {
     try {

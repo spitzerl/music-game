@@ -92,7 +92,8 @@ async function initSchema() {
     ALTER TABLE players
     ADD COLUMN IF NOT EXISTS is_connected BOOLEAN DEFAULT TRUE,
     ADD COLUMN IF NOT EXISTS is_bot BOOLEAN DEFAULT FALSE,
-    ADD COLUMN IF NOT EXISTS is_observer BOOLEAN DEFAULT FALSE;
+    ADD COLUMN IF NOT EXISTS is_observer BOOLEAN DEFAULT FALSE,
+    ADD COLUMN IF NOT EXISTS avatar_seed VARCHAR(255);
   `);
 
   await pool.query(`

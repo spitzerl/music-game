@@ -184,7 +184,10 @@
             <!-- Proposer (More compact on mobile) -->
             <div v-if="status === 'revelation'" class="z-10 w-full bg-slate-950/40 rounded-xl p-1.5 sm:p-2.5 border border-slate-800/60 mb-2 sm:mb-3 flex flex-col items-center justify-center gap-0.5 sm:gap-1 shadow-inner">
               <span class="text-[9px] sm:text-[10px] text-yellow-500/80 uppercase font-black tracking-widest">Proposé par</span>
-              <span class="text-lg sm:text-xl md:text-2xl font-black text-yellow-400 tracking-wide animate-pulse drop-shadow-md">{{ proposerName }}</span>
+              <div class="flex items-center gap-2 mt-1">
+                <img v-if="proposerPlayer?.avatar_seed" :src="`https://api.dicebear.com/9.x/notionists-neutral/svg?seed=${proposerPlayer.avatar_seed}`" class="w-8 h-8 sm:w-10 sm:h-10 rounded-full border border-yellow-500/30 bg-slate-800 shadow-md flex-shrink-0" alt="Avatar" />
+                <span class="text-lg sm:text-xl md:text-2xl font-black text-yellow-400 tracking-wide animate-pulse drop-shadow-md">{{ proposerName }}</span>
+              </div>
             </div>
 
             <!-- Personal Results (Smaller badges on mobile) -->
@@ -246,7 +249,10 @@
                 :disabled="target.id === store.player?.id"
                 :class="['p-5 rounded-2xl border text-left font-bold transition-all flex justify-between items-center text-base md:text-lg min-h-[64px]', selectedVoteId === target.id ? 'bg-cyan-500/10 border-cyan-500 text-white shadow-md shadow-cyan-500/10' : 'bg-slate-900/60 border-slate-800 text-slate-300 hover:border-slate-700 hover:text-white', target.id === store.player?.id ? 'opacity-50 cursor-not-allowed hover:border-slate-800 hover:text-slate-300 hover:scale-100 active:scale-100' : 'active:scale-[0.98] hover:scale-[1.01]']"
               >
-                <span class="truncate pr-2">{{ target.name }}</span>
+                <div class="flex items-center gap-3 truncate pr-2">
+                  <img v-if="target.avatar_seed" :src="`https://api.dicebear.com/9.x/notionists-neutral/svg?seed=${target.avatar_seed}`" class="w-8 h-8 md:w-10 md:h-10 rounded-full border border-slate-700/50 bg-slate-800/80 flex-shrink-0" alt="Avatar" />
+                  <span class="truncate">{{ target.name }}</span>
+                </div>
                 <!-- Vote Counter -->
                 <span v-if="store.session?.show_vote_count && getVoteCountForPlayer(target.id) > 0" class="w-6 h-6 flex-shrink-0 flex items-center justify-center text-[11px] bg-cyan-500/20 text-cyan-400 rounded-full border border-cyan-500/30 font-bold animate-pulse-glow">
                   {{ getVoteCountForPlayer(target.id) }}
@@ -262,6 +268,7 @@
           <div class="space-y-2 flex-1 overflow-y-auto pr-2 pb-2">
             <div v-for="result in voteResults" :key="result.player.id" class="flex items-center justify-between py-3.5 border-b border-slate-800/50 last:border-0 hover:bg-slate-900/10 transition-all px-2 rounded-xl">
               <div class="flex items-center gap-2">
+                <img v-if="result.player.avatar_seed" :src="`https://api.dicebear.com/9.x/notionists-neutral/svg?seed=${result.player.avatar_seed}`" class="w-6 h-6 rounded-full border border-slate-700/50 bg-slate-800 flex-shrink-0" alt="Avatar" />
                 <span class="font-bold text-slate-200 text-sm">{{ result.player.name }}</span>
                 <template v-if="result.vote">
                   <span class="text-xs text-slate-500">pense que c'est</span>
@@ -587,10 +594,14 @@ const myBlindTestResult = computed(() => {
   return { statusLabel, statusClass };
 });
 
+const proposerPlayer = computed(() => {
+  if (!store.currentMusic || !store.currentMusic.player_id) return null;
+  return store.players.find(p => p.id === store.currentMusic.player_id) || null;
+});
+
 const proposerName = computed(() => {
-  if (!store.currentMusic || !store.currentMusic.player_id) return 'Inconnu';
-  const player = store.players.find(p => p.id === store.currentMusic.player_id);
-  return player ? player.name : 'Inconnu';
+  const p = proposerPlayer.value;
+  return p ? p.name : 'Inconnu';
 });
 
 const getPlayerName = (id) => {

@@ -267,7 +267,13 @@
               <div class="flex items-center gap-3 min-w-0">
                 <!-- Status circle indicator -->
                 <span :class="['w-2.5 h-2.5 rounded-full flex-shrink-0', player.is_connected ? 'bg-emerald-500 animate-pulse' : 'bg-rose-500']"></span>
+                <img v-if="player.avatar_seed" :src="`https://api.dicebear.com/9.x/notionists-neutral/svg?seed=${player.avatar_seed}`" class="w-8 h-8 rounded-full border border-slate-700/50 bg-slate-800/80" alt="Avatar" />
                 <span class="font-bold text-white truncate">{{ player.name }}</span>
+                <button v-if="player.id === store.player?.id" @click.stop="regenerateAvatar(player.id)" title="Générer un nouvel avatar" class="p-1.5 ml-0.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white active:scale-95 transition-all">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-3.5 h-3.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99" />
+                  </svg>
+                </button>
                 <span v-if="player.is_bot" class="text-[10px] bg-cyan-500/20 text-cyan-400 border border-cyan-500/30 font-extrabold px-1.5 py-0.5 rounded uppercase tracking-wider flex-shrink-0">Bot</span>
                 <span v-if="player.name === store.session?.host_name" class="text-[10px] bg-yellow-500/20 text-yellow-400 border border-yellow-500/30 font-extrabold px-1.5 py-0.5 rounded uppercase tracking-wider flex-shrink-0">Hôte</span>
               </div>
@@ -520,6 +526,14 @@ const kickPlayer = async (targetId) => {
     } catch (err) {
       console.error("Failed to kick player:", err);
     }
+  }
+};
+
+const regenerateAvatar = async (playerId) => {
+  try {
+    await store.regenerateAvatar(playerId);
+  } catch (err) {
+    console.error("Failed to regenerate avatar:", err);
   }
 };
 </script>

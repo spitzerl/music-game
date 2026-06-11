@@ -71,6 +71,9 @@ export default {
   advanceRound(code) {
     return api.post(`/sessions/${code}/advance-round`);
   },
+  regenerateAvatar(code, playerId) {
+    return api.post(`/sessions/${code}/players/${playerId}/avatar`);
+  },
   searchDeezer(query = '') {
     return api.get('/deezer/search', { params: { q: query } });
   },

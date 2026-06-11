@@ -175,6 +175,7 @@
           <div v-for="player in store.players" :key="player.id" class="flex items-center gap-3 bg-slate-900/60 border border-slate-800 rounded-xl px-4 py-2 hover:bg-slate-800/60 transition-colors">
             <div class="flex items-center gap-2">
               <span :class="['w-2 h-2 rounded-full flex-shrink-0', player.is_connected ? 'bg-emerald-500' : 'bg-rose-500']"></span>
+              <img v-if="player.avatar_seed" :src="`https://api.dicebear.com/9.x/notionists-neutral/svg?seed=${player.avatar_seed}`" class="w-6 h-6 rounded-full border border-slate-700/50 bg-slate-800/80 -ml-0.5" alt="Avatar" />
               <span class="font-bold text-sm text-slate-300">{{ player.name }}</span>
               <span v-if="player.is_bot" class="text-[9px] bg-cyan-500/20 text-cyan-400 border border-cyan-500/30 px-1 py-0.5 rounded font-extrabold uppercase tracking-wider">Bot</span>
               <span v-if="player.name === store.session?.host_name" class="text-[9px] bg-yellow-500/20 text-yellow-400 border border-yellow-500/30 px-1 py-0.5 rounded font-extrabold uppercase tracking-wider">Hôte</span>

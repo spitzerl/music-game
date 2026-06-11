@@ -348,6 +348,23 @@ export default function buildRoutes(gameService, ioNamespace) {
       next(error);
     }
   });
+  router.post('/sessions/:code/players/:playerId/avatar', async (req, res, next) => {
+    try {
+      const code = requireNonEmptyString(req.params.code, 'code').toUpperCase();
+      const targetPlayerId = Number.parseInt(req.params.playerId, 10);
+
+      if (Number.isNaN(targetPlayerId)) {
+        const error = new Error('playerId doit être un entier valide');
+        error.status = 400;
+        throw error;
+      }
+
+      const state = await gameService.regenerateAvatar(code, targetPlayerId);
+      res.json(state);
+    } catch (error) {
+      next(error);
+    }
+  });
 
   return router;
 }

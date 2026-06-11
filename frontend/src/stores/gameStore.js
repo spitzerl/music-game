@@ -158,6 +158,13 @@ export const useGameStore = defineStore('game', {
       this.players = data.players;
       return data;
     },
+    async regenerateAvatar(playerId) {
+      if (!this.session || !this.player) return;
+      const { data } = await apiService.regenerateAvatar(this.session.code, playerId);
+      this.session = data.session;
+      this.players = data.players;
+      return data;
+    },
     addNotification(message, type = 'info') {
       const id = Date.now() + Math.random().toString(36).substring(2, 9);
       if (this.notifications.length >= 3) {

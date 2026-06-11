@@ -37,9 +37,15 @@
         <!-- 2nd Place -->
         <div v-if="podium[1]" class="order-1 flex flex-col items-center w-[31%] sm:w-48 group relative">
           <div class="podium-card relative w-full p-2 sm:p-6 rounded-2xl sm:rounded-3xl flex flex-col items-center justify-between h-36 sm:h-48 bg-gradient-to-b from-slate-500/15 via-slate-600/5 to-slate-950/10 border border-slate-500/35 shadow-lg text-center animate-grow-y transition-all duration-300 hover:translate-y-[-4px] hover:border-slate-400/50 hover:shadow-[0_0_30px_rgba(148,163,184,0.15)]" style="animation-delay: 0.15s;">
-            <!-- Medal Circle -->
-            <div class="absolute -top-6 sm:-top-10 w-9 h-9 sm:w-14 sm:h-14 rounded-full bg-gradient-to-br from-slate-200 via-slate-400 to-slate-500 border-2 border-slate-350 flex items-center justify-center text-sm sm:text-xl shadow-lg transition-transform duration-300 group-hover:scale-110">
-              🥈
+            <!-- Avatar & Medal -->
+            <div class="absolute -top-6 sm:-top-10 flex flex-col items-center">
+              <div class="relative">
+                <img v-if="podium[1].avatar_seed" :src="`https://api.dicebear.com/9.x/notionists-neutral/svg?seed=${podium[1].avatar_seed}`" class="w-10 h-10 sm:w-14 sm:h-14 rounded-full border-2 border-slate-350 bg-slate-800 shadow-lg transition-transform duration-300 group-hover:scale-110" alt="Avatar" />
+                <div v-else class="w-9 h-9 sm:w-14 sm:h-14 rounded-full bg-gradient-to-br from-slate-200 via-slate-400 to-slate-500 border-2 border-slate-350 flex items-center justify-center text-sm sm:text-xl shadow-lg transition-transform duration-300 group-hover:scale-110">🥈</div>
+                <div v-if="podium[1].avatar_seed" class="absolute -bottom-1 -right-1 sm:-bottom-2 sm:-right-2 w-4 h-4 sm:w-6 sm:h-6 rounded-full bg-gradient-to-br from-slate-200 via-slate-400 to-slate-500 border-2 border-slate-900 flex items-center justify-center text-[8px] sm:text-xs shadow-md">
+                  🥈
+                </div>
+              </div>
             </div>
             
             <div class="h-3 sm:h-6"></div>
@@ -67,9 +73,13 @@
                 <path d="M2 4 5 16h14l3-12-6 7-4-7-4 7-6-7Z"/>
                 <path d="M3 20h18"/>
               </svg>
-              <!-- Medal Circle -->
-              <div class="w-11 h-11 sm:w-16 sm:h-16 rounded-full bg-gradient-to-br from-yellow-300 via-amber-400 to-yellow-600 border-2 border-yellow-300 flex items-center justify-center text-base sm:text-2xl shadow-xl transition-transform duration-300 group-hover:scale-110">
-                🥇
+              <!-- Avatar & Medal -->
+              <div class="relative">
+                <img v-if="podium[0].avatar_seed" :src="`https://api.dicebear.com/9.x/notionists-neutral/svg?seed=${podium[0].avatar_seed}`" class="w-12 h-12 sm:w-16 sm:h-16 rounded-full border-2 border-yellow-300 bg-slate-800 shadow-xl transition-transform duration-300 group-hover:scale-110" alt="Avatar" />
+                <div v-else class="w-11 h-11 sm:w-16 sm:h-16 rounded-full bg-gradient-to-br from-yellow-300 via-amber-400 to-yellow-600 border-2 border-yellow-300 flex items-center justify-center text-base sm:text-2xl shadow-xl transition-transform duration-300 group-hover:scale-110">🥇</div>
+                <div v-if="podium[0].avatar_seed" class="absolute -bottom-1 -right-1 sm:-bottom-2 sm:-right-2 w-5 h-5 sm:w-7 sm:h-7 rounded-full bg-gradient-to-br from-yellow-300 via-amber-400 to-yellow-600 border-2 border-slate-900 flex items-center justify-center text-[10px] sm:text-sm shadow-md">
+                  🥇
+                </div>
               </div>
             </div>
             
@@ -91,9 +101,15 @@
         <!-- 3rd Place -->
         <div v-if="podium[2]" class="order-3 flex flex-col items-center w-[29%] sm:w-44 group relative">
           <div class="podium-card relative w-full p-2 sm:p-5 rounded-2xl sm:rounded-3xl flex flex-col items-center justify-between h-32 sm:h-42 bg-gradient-to-b from-amber-700/15 via-amber-800/5 to-amber-950/10 border border-amber-800/30 shadow-lg text-center animate-grow-y transition-all duration-300 hover:translate-y-[-4px] hover:border-amber-700/50 hover:shadow-[0_0_30px_rgba(180,83,9,0.15)]" style="animation-delay: 0s;">
-            <!-- Medal Circle -->
-            <div class="absolute -top-5 sm:-top-10 w-8 h-8 sm:w-12 sm:h-12 rounded-full bg-gradient-to-br from-amber-600 via-amber-700 to-amber-800 border-2 border-amber-600 flex items-center justify-center text-xs sm:text-lg shadow-lg transition-transform duration-300 group-hover:scale-110">
-              🥉
+            <!-- Avatar & Medal -->
+            <div class="absolute -top-5 sm:-top-10 flex flex-col items-center">
+              <div class="relative">
+                <img v-if="podium[2].avatar_seed" :src="`https://api.dicebear.com/9.x/notionists-neutral/svg?seed=${podium[2].avatar_seed}`" class="w-9 h-9 sm:w-12 sm:h-12 rounded-full border-2 border-amber-600 bg-slate-800 shadow-lg transition-transform duration-300 group-hover:scale-110" alt="Avatar" />
+                <div v-else class="w-8 h-8 sm:w-12 sm:h-12 rounded-full bg-gradient-to-br from-amber-600 via-amber-700 to-amber-800 border-2 border-amber-600 flex items-center justify-center text-xs sm:text-lg shadow-lg transition-transform duration-300 group-hover:scale-110">🥉</div>
+                <div v-if="podium[2].avatar_seed" class="absolute -bottom-1 -right-1 sm:-bottom-1.5 sm:-right-1.5 w-3.5 h-3.5 sm:w-5 sm:h-5 rounded-full bg-gradient-to-br from-amber-600 via-amber-700 to-amber-800 border-2 border-slate-900 flex items-center justify-center text-[6px] sm:text-[10px] shadow-md">
+                  🥉
+                </div>
+              </div>
             </div>
             
             <div class="h-2.5 sm:h-4"></div>
@@ -134,8 +150,15 @@
                 #{{ idx + 1 }}
               </div>
               
-              <!-- Initial Avatar -->
-              <div :class="[
+              <!-- Avatar -->
+              <img v-if="player.avatar_seed" :src="`https://api.dicebear.com/9.x/notionists-neutral/svg?seed=${player.avatar_seed}`" :class="[
+                'w-10 h-10 rounded-full border bg-slate-800 shadow-sm transition-colors duration-300',
+                idx === 0 ? 'border-yellow-500/40' :
+                idx === 1 ? 'border-slate-400/40' :
+                idx === 2 ? 'border-amber-700/40' :
+                'border-slate-800'
+              ]" alt="Avatar" />
+              <div v-else :class="[
                 'w-10 h-10 rounded-full border flex items-center justify-center font-bold uppercase text-sm shadow-sm transition-colors duration-300',
                 idx === 0 ? 'bg-gradient-to-br from-yellow-500/20 to-yellow-600/10 border-yellow-500/40 text-yellow-300' :
                 idx === 1 ? 'bg-gradient-to-br from-slate-400/20 to-slate-500/10 border-slate-400/40 text-slate-200' :
