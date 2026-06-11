@@ -221,8 +221,8 @@
                 <img
                   :src="`https://api.dicebear.com/9.x/notionists-neutral/svg?seed=${player.avatar_seed}&backgroundColor=6366f1,8b5cf6,06b6d4,f43f5e,10b981`"
                   class="player-avatar w-full h-full" :alt="`Avatar de ${player.name}`" loading="lazy" />
-                <button v-if="player.id === store.player?.id" @click.stop="regenerateAvatar(player.id)"
-                  class="absolute inset-0 flex items-center justify-center bg-slate-950/75 rounded-full opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-all duration-200 border-0 p-0 text-white cursor-pointer"
+                <button v-if="player.id === store.player?.id" @click.stop="regenerateAvatar(player.id); $event.currentTarget.blur()"
+                  class="absolute inset-0 flex items-center justify-center bg-slate-950/75 rounded-full opacity-0 group-hover:opacity-100 focus-visible:opacity-100 transition-all duration-200 border-0 p-0 text-white cursor-pointer"
                   title="Générer un nouvel avatar" aria-label="Générer un nouvel avatar">
                   <i class="fa-solid fa-arrows-rotate text-[11px] hover:rotate-180 transition-transform duration-300"></i>
                 </button>
