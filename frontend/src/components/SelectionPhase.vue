@@ -210,7 +210,7 @@ const getPlayerMusicCount = (id) => store.musicCounts ? (store.musicCounts[id] |
 
 const updateTimer = () => {
   if (store.session?.timer_ends_at) {
-    remainingTime.value = Math.max(0, Math.round((new Date(store.session.timer_ends_at).getTime() - Date.now()) / 1000));
+    remainingTime.value = Math.max(0, Math.round((new Date(store.session.timer_ends_at).getTime() - store.correctedNow()) / 1000));
   } else {
     remainingTime.value = 0;
   }

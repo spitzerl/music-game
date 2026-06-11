@@ -852,6 +852,7 @@ export default class GameService {
     let filteredMusics = [];
     let currentMusic = null;
     let votesForCurrentMusic = [];
+    let statePayload = {};
 
     if (session.phase === 'selection') {
       // During selection, players only see their own musics.
@@ -869,7 +870,7 @@ export default class GameService {
         filteredMusics = rawMusics.filter(m => m.player_id === targetId);
       }
 
-      return {
+      statePayload = {
         session,
         players: computedPlayers,
         musics: filteredMusics,
@@ -925,7 +926,7 @@ export default class GameService {
       }
 
       // Hide all player musics during voting phase to prevent cheat
-      return {
+      statePayload = {
         session,
         players: computedPlayers,
         currentMusic,
@@ -933,22 +934,27 @@ export default class GameService {
       };
     } else if (session.phase === 'results') {
       // Reveal everything
-      return {
+      statePayload = {
         session,
         players: computedPlayers,
         musics: rawMusics,
         votes
       };
+    } else {
+      // waiting phase
+      const parsedPlayerIdWaiting = playerId ? Number.parseInt(playerId, 10) : null;
+      const playerSelfWaiting = parsedPlayerIdWaiting ? computedPlayers.find(p => p.id === parsedPlayerIdWaiting) || null : null;
+      statePayload = {
+        session,
+        players: computedPlayers,
+        musics: rawMusics,
+        player: playerSelfWaiting
+      };
     }
 
-    // waiting phase
-    const parsedPlayerIdWaiting = playerId ? Number.parseInt(playerId, 10) : null;
-    const playerSelfWaiting = parsedPlayerIdWaiting ? computedPlayers.find(p => p.id === parsedPlayerIdWaiting) || null : null;
     return {
-      session,
-      players: computedPlayers,
-      musics: rawMusics,
-      player: playerSelfWaiting
+      ...statePayload,
+      serverTime: new Date().toISOString()
     };
   }
 

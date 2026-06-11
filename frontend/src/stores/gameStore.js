@@ -15,7 +15,13 @@ export const useGameStore = defineStore('game', {
     error: null,
     notifications: [],
     volume: localStorage.getItem('cekikilami_volume') !== null ? Number(localStorage.getItem('cekikilami_volume')) : 0.5,
+    serverTimeOffset: 0,
   }),
+  getters: {
+    correctedNow: (state) => {
+      return () => Date.now() + state.serverTimeOffset;
+    }
+  },
   actions: {
     async createSession(hostName) {
       const { data } = await apiService.createSession(hostName);
@@ -34,6 +40,9 @@ export const useGameStore = defineStore('game', {
     async loadSession(code) {
       const playerId = this.player?.id || null;
       const { data } = await apiService.getSession(code, playerId);
+      if (data && data.serverTime) {
+        this.updateServerTimeOffset(data.serverTime);
+      }
       this.session = data.session;
       this.players = data.players;
       this.musics = data.musics || [];
@@ -191,6 +200,9 @@ export const useGameStore = defineStore('game', {
       socketService.join(code, playerId);
       
       socketService.on('state:update', (state) => {
+        if (state && state.serverTime) {
+          this.updateServerTimeOffset(state.serverTime);
+        }
         this.session = state.session;
         this.players = state.players;
         this.musics = state.musics || [];
@@ -261,6 +273,11 @@ export const useGameStore = defineStore('game', {
       this.currentMusic = null;
       this.votes = null;
       localStorage.removeItem('music_game_player');
+    },
+    updateServerTimeOffset(serverTime) {
+      if (serverTime) {
+        this.serverTimeOffset = new Date(serverTime).getTime() - Date.now();
+      }
     }
   },
 });

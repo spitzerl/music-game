@@ -614,7 +614,7 @@ const castVote = async (targetId) => {
 const updateTimer = () => {
   if (store.session?.timer_ends_at) {
     const end = new Date(store.session.timer_ends_at).getTime();
-    const diff = Math.max(0, Math.round((end - Date.now()) / 1000));
+    const diff = Math.max(0, Math.round((end - store.correctedNow()) / 1000));
     remainingTime.value = diff;
   } else {
     remainingTime.value = 0;
