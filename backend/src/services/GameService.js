@@ -16,6 +16,12 @@ const normalizeTitle = (t) => {
     .trim();
 };
 
+const BOT_NAMES_POOL = [
+  'Lucas', 'Hugo', 'Arthur', 'Thomas', 'Léa', 'Camille', 'Manon', 'Chloé', 'Emma', 'Nathan',
+  'Enzo', 'Louis', 'Clara', 'Sarah', 'Inès', 'Maëlys', 'Jade', 'Léo', 'Gabriel', 'Paul',
+  'Maxime', 'Julien', 'Antoine', 'Nicolas', 'Marie', 'Julie', 'Sophie', 'Alexandre', 'Adrien', 'Elisa'
+];
+
 const BOT_TRACKS = [
   { title: "Blinding Lights", artist: "The Weeknd", file_path: "https://cdns-preview-e.dzcdn.net/stream/c-e12ac87d5b1b748f06f7ad86903f262b-6.mp3" },
   { title: "Shape of You", artist: "Ed Sheeran", file_path: "https://cdns-preview-d.dzcdn.net/stream/c-d232fb2ed0b90d8a297bdc07520e5883-6.mp3" },
@@ -132,8 +138,23 @@ export default class GameService {
       throw new Error('Nombre maximum de joueurs atteint');
     }
 
-    const botCount = players.filter(p => p.is_bot).length;
-    const botName = `Bot ${botCount + 1}`;
+    // Choose a unique real name for the bot from the pool
+    const existingNames = new Set(players.map(p => p.name.toLowerCase()));
+    let botName = '';
+    
+    const shuffledPool = [...BOT_NAMES_POOL].sort(() => Math.random() - 0.5);
+    for (const candidate of shuffledPool) {
+      if (!existingNames.has(candidate.toLowerCase())) {
+        botName = candidate;
+        break;
+      }
+    }
+
+    if (!botName) {
+      const botCount = players.filter(p => p.is_bot).length;
+      botName = `Bot ${botCount + 1}`;
+    }
+
     const bot = await Player.create({ sessionId: session.id, name: botName, isBot: true });
     this.log(code, `Bot added: ${botName}`);
     return this.getState(code);
