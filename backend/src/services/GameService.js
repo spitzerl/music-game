@@ -230,42 +230,93 @@ export default class GameService {
     // Transition to selection
     await Session.updatePhase(code, 'selection');
     
-    // Auto-generate music for bots
+    // Auto-generate music for bots with specific musical tastes
     const players = await Player.findBySession(session.id);
     const bots = players.filter(p => p.is_bot);
+    
+    const GENRE_QUERIES = {
+      metal: ['Metallica', 'Iron Maiden', 'Slipknot', 'System of a Down', 'Gojira', 'Rammstein', 'Megadeth', 'Slayer', 'Nightwish', 'Korn'],
+      electro: ['Daft Punk', 'David Guetta', 'Avicii', 'Calvin Harris', 'Kygo', 'Martin Garrix', 'Justice', 'Fred again..', 'Peggy Gou', 'Disclosure'],
+      reggae: ['Bob Marley', 'Dub Inc', 'Naâman', 'Tiken Jah Fakoly', 'Damian Marley', 'Alpha Blondy', 'Alborosie', 'Protoje', 'Chronixx', 'Buju Banton'],
+      variete: ['Celine Dion', 'Jean-Jacques Goldman', 'Francis Cabrel', 'Michel Sardou', 'Johnny Hallyday', 'Mylene Farmer', 'Stromae', 'Clara Luciani', 'Vianney', 'Angèle'],
+      rock: ['Queen', 'Pink Floyd', 'Led Zeppelin', 'AC/DC', 'The Rolling Stones', 'Nirvana', 'Radiohead', 'U2', 'Coldplay', 'Muse'],
+      rap: ['Eminem', 'Dr. Dre', 'Snoop Dogg', 'Tupac', 'Jay-Z', 'Jul', 'Damso', 'Orelsan', 'Ninho', 'Gazo'],
+      disco: ['ABBA', 'Bee Gees', 'Boney M', 'Chic', 'Earth, Wind & Fire', 'Donna Summer', 'Gloria Gaynor', 'Kool & The Gang', 'Diana Ross', 'Sister Sledge']
+    };
+    
+    const genres = Object.keys(GENRE_QUERIES);
+
     for (const bot of bots) {
-      // Pick random tracks
-      const shuffledTracks = [...BOT_TRACKS].sort(() => Math.random() - 0.5);
+      const favoriteGenre = genres[bot.id % genres.length];
+      const artistPool = [...GENRE_QUERIES[favoriteGenre]].sort(() => Math.random() - 0.5);
+      
       const limit = session.max_musics_per_player;
-      for (let i = 0; i < limit; i++) {
-        const track = shuffledTracks[i % shuffledTracks.length];
-        
-        let freshFilePath = track.file_path;
-        let coverUrl = null;
+      let submittedCount = 0;
+      
+      for (let i = 0; i < artistPool.length && submittedCount < limit; i++) {
+        const artist = artistPool[i];
         try {
-          const searchUrl = `https://api.deezer.com/search?q=${encodeURIComponent(`${track.title} ${track.artist}`)}&limit=1`;
+          const searchUrl = `https://api.deezer.com/search?q=${encodeURIComponent(artist)}&limit=25`;
           const response = await fetch(searchUrl);
           if (response.ok) {
             const payload = await response.json();
-            if (payload?.data?.[0]?.preview) {
-              freshFilePath = payload.data[0].preview;
-            }
-            if (payload?.data?.[0]?.album?.cover_medium) {
-              coverUrl = payload.data[0].album.cover_medium;
+            const results = (payload?.data || []).filter(r => r.preview);
+            
+            if (results.length > 0) {
+              const randomTrack = results[Math.floor(Math.random() * results.length)];
+              
+              await Music.create({
+                sessionId: session.id,
+                playerId: bot.id,
+                title: randomTrack.title,
+                artist: randomTrack.artist.name,
+                filePath: randomTrack.preview,
+                coverUrl: randomTrack.album?.cover_medium || null
+              });
+              
+              submittedCount++;
+              this.log(session.code, `Bot ${bot.name} (${favoriteGenre}) submitted: ${randomTrack.title} by ${randomTrack.artist.name}`);
             }
           }
         } catch (err) {
-          console.warn(`Failed to fetch fresh preview for bot track: ${track.title}`, err);
+          console.warn(`Failed to fetch custom genre track for bot: ${bot.name}`, err);
         }
+      }
+      
+      // Fallback in case we couldn't get enough tracks for the bot
+      if (submittedCount < limit) {
+        const shuffledTracks = [...BOT_TRACKS].sort(() => Math.random() - 0.5);
+        for (let i = submittedCount; i < limit; i++) {
+          const track = shuffledTracks[i % shuffledTracks.length];
+          
+          let freshFilePath = track.file_path;
+          let coverUrl = null;
+          try {
+            const searchUrl = `https://api.deezer.com/search?q=${encodeURIComponent(`${track.title} ${track.artist}`)}&limit=1`;
+            const response = await fetch(searchUrl);
+            if (response.ok) {
+              const payload = await response.json();
+              if (payload?.data?.[0]?.preview) {
+                freshFilePath = payload.data[0].preview;
+              }
+              if (payload?.data?.[0]?.album?.cover_medium) {
+                coverUrl = payload.data[0].album.cover_medium;
+              }
+            }
+          } catch (err) {
+            console.warn(`Failed to fetch fresh preview for bot fallback track: ${track.title}`, err);
+          }
 
-        await Music.create({
-          sessionId: session.id,
-          playerId: bot.id,
-          title: track.title,
-          artist: track.artist,
-          filePath: freshFilePath,
-          coverUrl
-        });
+          await Music.create({
+            sessionId: session.id,
+            playerId: bot.id,
+            title: track.title,
+            artist: track.artist,
+            filePath: freshFilePath,
+            coverUrl
+          });
+          this.log(session.code, `Bot ${bot.name} (fallback) submitted: ${track.title}`);
+        }
       }
     }
 
