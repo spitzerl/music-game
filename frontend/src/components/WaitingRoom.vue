@@ -163,8 +163,9 @@
                 <i v-else-if="toggle.key === 'autoAdvance'" class="fa-solid fa-arrows-rotate text-[14px] text-slate-400 flex-shrink-0"></i>
                 <i v-else-if="toggle.key === 'showVoteCount'" class="fa-regular fa-chart-bar text-[14px] text-slate-400 flex-shrink-0"></i>
                 <i v-else-if="toggle.key === 'enableBlindTest'" class="fa-solid fa-music text-[14px] text-slate-400 flex-shrink-0"></i>
-                <label :for="`toggle-${toggle.key}`" class="text-sm text-[var(--text-secondary)] font-semibold pr-4 cursor-pointer truncate">
-                  {{ toggle.label }}
+                <label :for="`toggle-${toggle.key}`" class="text-sm text-[var(--text-secondary)] font-semibold pr-4 cursor-pointer truncate flex items-center gap-2">
+                  <span>{{ toggle.label }}</span>
+                  <span v-if="toggle.key === 'enableBlindTest'" class="badge badge-accent text-[10px] px-1.5 py-0.5 leading-none" style="text-transform: none; letter-spacing: normal;">+1 pt</span>
                 </label>
               </div>
               <label class="switch-container flex-shrink-0">
@@ -300,7 +301,7 @@ const toggleOptions = [
   { key: 'showAnswers',     label: 'Révéler les réponses' },
   { key: 'autoAdvance',     label: 'Enchaîner les manches' },
   { key: 'showVoteCount',   label: 'Afficher le nombre de votes' },
-  { key: 'enableBlindTest', label: 'Blind Test QCM (+1 pt)' },
+  { key: 'enableBlindTest', label: 'Blind test' },
 ];
 
 const toggleConfigMobile = () => {
