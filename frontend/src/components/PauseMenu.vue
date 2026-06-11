@@ -226,45 +226,34 @@ const copyLink = async () => {
 };
 
 const confirmReset = async () => {
-  if (confirm("Voulez-vous vraiment retourner au salon d'attente ? La manche actuelle et les musiques soumises seront réinitialisées.")) {
-    try {
-      await store.resetSession();
-      closeMenu();
-    } catch (err) {
-      console.error("Failed to reset session:", err);
-    }
+  try {
+    await store.resetSession();
+    closeMenu();
+  } catch (err) {
+    console.error("Failed to reset session:", err);
   }
 };
 
 const confirmLeave = () => {
-  const msg = isHost.value 
-    ? "Vous êtes l'hôte. Quitter la partie supprimera la session. Voulez-vous vraiment continuer ?" 
-    : "Voulez-vous vraiment quitter la partie ?";
-  if (confirm(msg)) {
-    store.leaveSession();
-    closeMenu();
-    router.push('/');
-  }
+  store.leaveSession();
+  closeMenu();
+  router.push('/');
 };
 
 const promotePlayer = async (targetId) => {
-  if (confirm("Voulez-vous vraiment désigner ce joueur comme Hôte ? Vous perdrez vos droits d'administration.")) {
-    try {
-      await store.promotePlayer(targetId);
-      currentTab.value = 'main';
-    } catch (err) {
-      console.error("Failed to promote player:", err);
-    }
+  try {
+    await store.promotePlayer(targetId);
+    currentTab.value = 'main';
+  } catch (err) {
+    console.error("Failed to promote player:", err);
   }
 };
 
 const kickPlayer = async (targetId) => {
-  if (confirm("Voulez-vous vraiment exclure ce joueur de la partie ?")) {
-    try {
-      await store.kickPlayer(targetId);
-    } catch (err) {
-      console.error("Failed to kick player:", err);
-    }
+  try {
+    await store.kickPlayer(targetId);
+  } catch (err) {
+    console.error("Failed to kick player:", err);
   }
 };
 

@@ -404,7 +404,7 @@ const saveConfig = async () => {
 
 const addBot          = async () => { if (isHost.value) try { await store.addBot(); } catch {} };
 const startSelection  = async () => { if (isHost.value) try { await store.startSelection(); } catch {} };
-const promotePlayer   = async (id) => { if (confirm("Désigner ce joueur comme Hôte ? Vous perdrez vos droits.")) try { await store.promotePlayer(id); } catch {} };
-const kickPlayer      = async (id) => { if (confirm("Exclure ce joueur du salon ?")) try { await store.kickPlayer(id); } catch {} };
+const promotePlayer   = async (id) => { try { await store.promotePlayer(id); } catch {} };
+const kickPlayer      = async (id) => { try { await store.kickPlayer(id); } catch {} };
 const regenerateAvatar = async (id) => { try { await store.regenerateAvatar(id); } catch {} };
 </script>

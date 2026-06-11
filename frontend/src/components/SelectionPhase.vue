@@ -301,6 +301,6 @@ const chooseTrack = async (track) => {
 
 const deleteSubmittedMusic = async (id) => { try { await store.deleteMusic(id); } catch {} };
 const forceStartVoting = async () => { if (isHost.value) try { await store.startVoting(); } catch {} };
-const promotePlayer = async (id) => { if (confirm("Désigner ce joueur comme Hôte ?")) try { await store.promotePlayer(id); } catch {} };
-const kickPlayer    = async (id) => { if (confirm("Exclure ce joueur ?"))             try { await store.kickPlayer(id); }    catch {} };
+const promotePlayer = async (id) => { try { await store.promotePlayer(id); } catch {} };
+const kickPlayer    = async (id) => { try { await store.kickPlayer(id); }    catch {} };
 </script>
