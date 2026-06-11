@@ -235,13 +235,27 @@ export default class GameService {
     const bots = players.filter(p => p.is_bot);
     
     const GENRE_QUERIES = {
-      metal: ['Metallica', 'Iron Maiden', 'Slipknot', 'System of a Down', 'Gojira', 'Rammstein', 'Megadeth', 'Slayer', 'Nightwish', 'Korn'],
-      electro: ['Daft Punk', 'David Guetta', 'Avicii', 'Calvin Harris', 'Kygo', 'Martin Garrix', 'Justice', 'Fred again..', 'Peggy Gou', 'Disclosure'],
-      reggae: ['Bob Marley', 'Dub Inc', 'Naâman', 'Tiken Jah Fakoly', 'Damian Marley', 'Alpha Blondy', 'Alborosie', 'Protoje', 'Chronixx', 'Buju Banton'],
-      variete: ['Celine Dion', 'Jean-Jacques Goldman', 'Francis Cabrel', 'Michel Sardou', 'Johnny Hallyday', 'Mylene Farmer', 'Stromae', 'Clara Luciani', 'Vianney', 'Angèle'],
-      rock: ['Queen', 'Pink Floyd', 'Led Zeppelin', 'AC/DC', 'The Rolling Stones', 'Nirvana', 'Radiohead', 'U2', 'Coldplay', 'Muse'],
-      rap: ['Eminem', 'Dr. Dre', 'Snoop Dogg', 'Tupac', 'Jay-Z', 'Jul', 'Damso', 'Orelsan', 'Ninho', 'Gazo'],
-      disco: ['ABBA', 'Bee Gees', 'Boney M', 'Chic', 'Earth, Wind & Fire', 'Donna Summer', 'Gloria Gaynor', 'Kool & The Gang', 'Diana Ross', 'Sister Sledge']
+      metal: ['Metallica', 'Iron Maiden', 'Slipknot', 'System of a Down', 'Gojira', 'Rammstein', 'Megadeth', 'Slayer', 'Nightwish', 'Korn', 'Guns N\' Roses', 'Black Sabbath', 'Judas Priest', 'Motorhead', 'Tool', 'Deftones', 'Avenged Sevenfold'],
+      electro: ['Daft Punk', 'David Guetta', 'Avicii', 'Calvin Harris', 'Kygo', 'Martin Garrix', 'Justice', 'Fred again..', 'Peggy Gou', 'Disclosure', 'Deadmau5', 'Skrillex', 'Swedish House Mafia', 'Fatboy Slim', 'Flume', 'Paul Kalkbrenner', 'Petit Biscuit'],
+      reggae: ['Bob Marley', 'Dub Inc', 'Naâman', 'Tiken Jah Fakoly', 'Damian Marley', 'Alpha Blondy', 'Alborosie', 'Protoje', 'Chronixx', 'Buju Banton', 'Shaggy', 'Sean Paul', 'Jimmy Cliff', 'Peter Tosh', 'Steel Pulse', 'Groundation', 'Danakil', 'Tryo'],
+      variete: ['Celine Dion', 'Jean-Jacques Goldman', 'Francis Cabrel', 'Michel Sardou', 'Johnny Hallyday', 'Mylene Farmer', 'Stromae', 'Clara Luciani', 'Vianney', 'Angèle', 'Edith Piaf', 'Charles Aznavour', 'Serge Gainsbourg', 'Jacques Brel', 'Georges Brassens', 'Renaud', 'Daniel Balavoine', 'Indochine'],
+      pop: ['The Weeknd', 'Ed Sheeran', 'Billie Eilish', 'Harry Styles', 'Taylor Swift', 'Dua Lipa', 'Bruno Mars', 'Ariana Grande', 'Justin Bieber', 'Miley Cyrus', 'Lady Gaga', 'Rihanna', 'Beyoncé', 'Katy Perry', 'Shakira', 'Michael Jackson', 'Madonna', 'Britney Spears', 'Coldplay'],
+      rap: ['Eminem', 'Dr. Dre', 'Snoop Dogg', 'Tupac', 'Jay-Z', 'Kendrick Lamar', 'Drake', 'Kanye West', 'Travis Scott', '50 Cent', 'Lil Wayne', 'Post Malone', 'Mac Miller'],
+      disco: ['ABBA', 'Bee Gees', 'Boney M', 'Chic', 'Earth, Wind & Fire', 'Donna Summer', 'Gloria Gaynor', 'Kool & The Gang', 'Diana Ross', 'Sister Sledge', 'Jamiroquai', 'Prince', 'Stevie Wonder', 'Rick James'],
+      rock: ['Queen', 'Pink Floyd', 'Led Zeppelin', 'AC/DC', 'The Rolling Stones', 'Nirvana', 'Radiohead', 'U2', 'Coldplay', 'Muse', 'The Beatles', 'Oasis', 'Blur', 'Arctic Monkeys', 'The Strokes', 'Red Hot Chili Peppers', 'Green Day', 'Foo Fighters', 'Linkin Park', 'Gorillaz'],
+      jazz: ['Miles Davis', 'John Coltrane', 'Ella Fitzgerald', 'Louis Armstrong', 'Billie Holiday', 'Nina Simone', 'Ray Charles', 'B.B. King', 'Etta James', 'Frank Sinatra', 'Norah Jones', 'Gregory Porter', 'Chet Baker', 'Aretha Franklin', 'Otis Redding', 'Al Green'],
+      soundtrack: ['Hans Zimmer', 'John Williams', 'Ennio Morricone', 'Ludovico Einaudi', 'Joe Hisaishi', 'Yann Tiersen', 'Ramin Djawadi', 'Danny Elfman', 'Howard Shore', 'Alan Silvestri'],
+      classical: ['Mozart', 'Beethoven', 'Bach', 'Chopin', 'Vivaldi', 'Debussy', 'Tchaikovsky'],
+      rnb: ['Marvin Gaye', 'Amy Winehouse', 'Alicia Keys', 'John Legend', 'Usher', 'Ne-Yo', 'Destiny\'s Child', 'TLC', 'SZA', 'Frank Ocean', 'Erykah Badu', 'Lauryn Hill', 'Leon Bridges', 'Silk Sonic'],
+      synthwave: ['Depeche Mode', 'New Order', 'The Cure', 'Tears for Fears', 'Eurythmics', 'Pet Shop Boys', 'A-ha', 'Duran Duran', 'Kavinsky', 'The Midnight', 'Carpenter Brut', 'Gunship', 'FM-84', 'Perturbator'],
+      latin: ['Daddy Yankee', 'Bad Bunny', 'J Balvin', 'Maluma', 'Karol G', 'Rosalia', 'Enrique Iglesias', 'Ricky Martin', 'Luis Fonsi', 'Pitbull', 'Don Omar', 'Marc Anthony', 'Celia Cruz', 'Santana', 'Buena Vista Social Club', 'Manu Chao', 'Juanes'],
+      lofi: ['Nujabes', 'J Dilla', 'Lofi Girl', 'Idealism', 'Jinsang', 'Kudasai', 'Saib', 'Elijah Who', 'SwuM', 'Wun Two', 'Tomppabeats'],
+      grunge: ['Pearl Jam', 'Soundgarden', 'Alice in Chains', 'Stone Temple Pilots', 'Smashing Pumpkins', 'Sonic Youth', 'PJ Harvey', 'Garbage', 'Weezer', 'Beck', 'Incubus', 'Audioslave', 'Rage Against the Machine'],
+      afrobeats: ['Burna Boy', 'Wizkid', 'Davido', 'Rema', 'Asake', 'Fireboy DML', 'Tems', 'Tiwa Savage', 'CKay', 'Omah Lay', 'Fela Kuti', 'Magic System', 'Fally Ipupa', 'Salif Keita', 'Youssou N\'Dour'],
+      kpop: ['BTS', 'BLACKPINK', 'Twice', 'NewJeans', 'Stray Kids', 'IU', 'Utada Hikaru', 'Kenshi Yonezu', 'Yoasobi', 'Babymetal', 'Perfume', 'One Ok Rock', 'Radwimps', 'LiSA', 'Aimer'],
+      country: ['Johnny Cash', 'Dolly Parton', 'Willie Nelson', 'Shania Twain', 'Luke Combs', 'Morgan Wallen', 'Zach Bryan', 'Chris Stapleton', 'Bob Dylan', 'Neil Young', 'Joni Mitchell', 'Simon & Garfunkel', 'Mumford & Sons', 'The Lumineers', 'Fleet Foxes', 'Bon Iver', 'Vance Joy'],
+      punk: ['The Clash', 'Ramones', 'Sex Pistols', 'Blink-182', 'Sum 41', 'The Offspring', 'Rancid', 'NOFX', 'Bad Religion', 'Rise Against', 'Sublime', 'Madness', 'The Specials', 'Reel Big Fish'],
+      french_rap: ['IAM', 'Supreme NTM', 'Booba', 'Kaaris', 'PNL', 'Nekfeu', 'Lomepal', 'Vald', 'Niska', 'SCH', 'Gims', 'PLK', 'Hamza', 'Freeze Corleone', 'Laylow', 'Josman', 'Dinos', 'Kery James']
     };
     
     const genres = Object.keys(GENRE_QUERIES);
