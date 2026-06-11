@@ -1,340 +1,246 @@
 <template>
-  <!-- Loading state -->
-  <div v-if="isLoading" class="min-h-screen flex items-center justify-center p-4">
-    <div class="text-slate-400 font-semibold flex items-center gap-2">
-      <span class="w-2.5 h-2.5 rounded-full bg-cyan-400 animate-ping"></span>
-      Chargement...
+  <!-- Loading -->
+  <div v-if="isLoading" class="min-h-dvh flex items-center justify-center" role="status" aria-label="Chargement en cours">
+    <div class="flex items-center gap-3 text-[var(--text-secondary)]">
+      <span class="w-2.5 h-2.5 rounded-full bg-indigo-400 animate-ping"></span>
+      <span class="font-semibold">Chargement…</span>
     </div>
   </div>
 
-  <!-- Join Form if not in session -->
-  <div v-else-if="!store.player || store.player.session_id !== store.session?.id" class="relative min-h-screen flex items-center justify-center p-4 overflow-hidden">
-    <div class="absolute -top-40 -left-40 w-96 h-96 bg-purple-600 rounded-full filter blur-[128px] opacity-20 animate-pulse"></div>
-    <div class="absolute -bottom-40 -right-40 w-96 h-96 bg-cyan-600 rounded-full filter blur-[128px] opacity-20 animate-pulse" style="animation-delay: 2s;"></div>
-    
-    <div class="relative z-10 glass-panel p-8 rounded-2xl shadow-xl w-full max-w-md border border-slate-700">
-      <h2 class="text-3xl font-extrabold text-center mb-6">
-        <span class="bg-gradient-to-r from-cyan-400 to-purple-500 bg-clip-text text-transparent">Rejoindre la partie {{ route.params.code }}</span>
-      </h2>
-      <form @submit.prevent="joinDirectly" class="space-y-4">
+  <!-- Direct join form (arriving via URL) -->
+  <div v-else-if="!store.player || store.player.session_id !== store.session?.id"
+    class="relative min-h-dvh flex items-center justify-center p-4 overflow-hidden">
+    <div class="absolute -top-40 -left-40 w-80 h-80 rounded-full blur-[120px] opacity-20 bg-indigo-600 pointer-events-none" aria-hidden="true"></div>
+    <div class="absolute -bottom-40 -right-40 w-80 h-80 rounded-full blur-[120px] opacity-20 bg-violet-600 pointer-events-none" aria-hidden="true"></div>
+
+    <div class="relative z-10 glass-panel p-8 rounded-2xl shadow-xl w-full max-w-sm border border-indigo-500/20 animate-fade-in-up opacity-0">
+      <h1 class="text-2xl font-extrabold text-center mb-1">
+        <span class="bg-gradient-to-r from-indigo-400 to-violet-400 bg-clip-text text-transparent">
+          Rejoindre la partie
+        </span>
+      </h1>
+      <p class="text-sm text-center text-[var(--text-secondary)] mb-6">
+        Code : <span class="font-mono font-bold text-indigo-300">{{ route.params.code }}</span>
+      </p>
+      <form @submit.prevent="joinDirectly" class="space-y-4" novalidate>
         <div>
-          <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Votre Pseudo</label>
-          <input v-model="directPseudo" required class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-cyan-500 transition-all" placeholder="Entrez un pseudo" />
+          <label for="direct-pseudo" class="form-label">Votre Pseudo</label>
+          <input id="direct-pseudo" v-model="directPseudo" required class="form-input" placeholder="Entrez un pseudo" autocomplete="nickname" maxlength="32" />
         </div>
-        <button class="w-full glow-btn bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold py-2.5 rounded-lg transition-all">
+        <button type="submit" class="btn btn-primary w-full" :disabled="!directPseudo.trim()">
           Rejoindre
         </button>
       </form>
-      <p v-if="errorMsg" class="mt-4 text-center text-rose-400 text-sm font-semibold bg-rose-500/10 border border-rose-500/20 py-2 rounded-lg">
+      <div v-if="errorMsg" role="alert" aria-live="polite" class="mt-4 flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-semibold" style="background:var(--clr-danger-dim);border:1px solid rgba(244,63,94,.3);color:#fda4af">
         {{ errorMsg }}
-      </p>
+      </div>
     </div>
   </div>
 
-  <!-- Waiting Room Content -->
-  <div v-else class="min-h-screen p-6 pb-24 md:pb-6 max-w-7xl mx-auto flex flex-col justify-start gap-4 opacity-0 animate-fade-in-up">
+  <!-- Waiting Room -->
+  <div v-else class="page-container animate-fade-in-up opacity-0">
+
     <!-- Header -->
-    <header class="flex justify-between items-center mb-8 pb-4 border-b border-slate-800">
+    <header class="page-header">
       <div>
-        <h1 class="text-3xl font-extrabold text-white">Salon de Jeu</h1>
-        <p class="text-slate-400 text-sm flex items-center gap-2 flex-wrap mt-1">
-          <span>Lien d'invitation :</span>
-          <span @click="copyCode" class="font-mono text-cyan-400 font-bold text-lg bg-slate-900 px-2.5 py-0.5 rounded border border-slate-800 cursor-pointer hover:bg-slate-800 hover:border-cyan-500/50 transition-all inline-flex items-center gap-1.5 active:scale-95" title="Cliquez pour copier le lien">
+        <h1 class="text-2xl sm:text-3xl font-extrabold text-white">Salon de Jeu</h1>
+        <div class="flex items-center gap-2 flex-wrap mt-1">
+          <span class="text-sm text-[var(--text-secondary)]">Inviter :</span>
+          <button @click="copyCode" :title="'Copier le lien d\'invitation'"
+            class="font-mono text-indigo-300 font-bold bg-[var(--surface-raised)] px-2.5 py-0.5 rounded-lg border border-[var(--border-strong)] cursor-pointer hover:border-indigo-500/50 hover:bg-[var(--surface-overlay)] transition-all inline-flex items-center gap-1.5 active:scale-95 text-sm touch-target"
+            :aria-label="`Copier le lien d'invitation — code ${route.params.code}`">
             {{ route.params.code }}
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-3.5 h-3.5 opacity-60 hover:opacity-100">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 17.25v3.375c0 .621-.504 1.125-1.125 1.125h-9.75a1.125 1.125 0 0 1-1.125-1.125V7.875c0-.621.504-1.125 1.125-1.125H5.25m11.9-3.664A2.251 2.251 0 0 0 15 2.25h-3a2.251 2.251 0 0 0-2.15 1.586m5.8 0c.065.21.1.433.1.664v.75h-6V4.5c0-.231.035-.454.1-.664M6.75 7.5h.75m-.75 3h.75m-.75 3h.75m-.75 3h.75M19.5 7.5h-12c-.621 0-1.125.504-1.125 1.125v10.5c0 .621.504 1.125 1.125 1.125h12c.621 0 1.125-.504 1.125-1.125V8.625c0-.621-.504-1.125-1.125-1.125Z" />
-            </svg>
-          </span>
-          <span v-if="copied" class="text-emerald-400 text-xs font-bold bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded animate-fade-in">Lien copié !</span>
-          <span v-else class="text-[11px] text-slate-500 italic">(cliquez pour copier le lien)</span>
-        </p>
+            <svg class="w-3.5 h-3.5 opacity-60" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 7.5V6.108c0-1.135.845-2.098 1.976-2.192.373-.03.748-.057 1.123-.08M15.75 18H18a2.25 2.25 0 0 0 2.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 0 0-1.123-.08M15.75 18.75v-1.875a3.375 3.375 0 0 0-3.375-3.375h-1.5a1.125 1.125 0 0 1-1.125-1.125v-1.5A3.375 3.375 0 0 0 6.375 7.5H5.25m11.9-3.664A2.251 2.251 0 0 0 15 2.25h-3a2.251 2.251 0 0 0-2.15 1.586m5.8 0c.065.21.1.433.1.664v.75h-6V4.5c0-.231.035-.454.1-.664"/></svg>
+          </button>
+          <Transition name="fade">
+            <span v-if="copied" class="badge badge-success">Lien copié !</span>
+          </Transition>
+        </div>
       </div>
-      <div class="flex items-center gap-2 bg-slate-900/60 border border-slate-800 px-4 py-2 rounded-xl">
-        <span class="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
-        <span class="text-sm font-medium text-slate-300">Phase d'attente</span>
+      <div class="flex items-center gap-2 px-3 py-1.5 rounded-xl" style="background:var(--surface-raised);border:1px solid var(--border-strong)">
+        <span class="status-dot online animate-pulse"></span>
+        <span class="text-sm font-semibold text-[var(--text-secondary)]">En attente</span>
       </div>
     </header>
 
-    <div class="grid md:grid-cols-3 gap-8 mb-8 items-start">
-      <!-- Left Column: Config Panel -->
-      <section class="glass-panel p-6 rounded-2xl md:col-span-1 border border-slate-800 transition-all duration-300">
-        <div class="flex justify-between items-center mb-4 md:mb-6 cursor-pointer md:cursor-default bg-slate-900/40 md:bg-transparent p-3 md:p-0 rounded-xl md:rounded-none border border-slate-800/50 md:border-0" @click="toggleConfigMobile">
-          <h2 class="text-xl font-bold text-white flex items-center gap-2">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5 text-cyan-400">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.324.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 0 1 1.37.49l1.296 2.247a1.125 1.125 0 0 1-.26 1.43l-1.003.828c-.293.241-.438.613-.43.992a7.723 7.723 0 0 1 0 .255c-.008.378.137.75.43.991l1.004.827c.424.35.534.954.26 1.43l-1.298 2.247a1.125 1.125 0 0 1-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.47 6.47 0 0 1-.22.128c-.331.183-.581.495-.644.869l-.213 1.281c-.09.543-.56.94-1.11.94h-2.594c-.55 0-1.019-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 0 1-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 0 1-1.369-.49l-1.297-2.247a1.125 1.125 0 0 1 .26-1.43l1.004-.827c.292-.24.437-.613.43-.991a6.932 6.932 0 0 1 0-.255c.007-.38-.138-.751-.43-.992l-1.004-.827a1.125 1.125 0 0 1-.26-1.43l1.297-2.247a1.125 1.125 0 0 1 1.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.086.22-.128.332-.183.582-.495.644-.869l.214-1.28Z" />
-              <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
-            </svg>
-            Paramètres du jeu
+    <div class="grid md:grid-cols-3 gap-6 items-start">
+
+      <!-- Config Panel -->
+      <section class="glass-panel p-5 rounded-2xl md:col-span-1 border border-[var(--border-strong)]" aria-labelledby="config-heading">
+        <!-- Mobile toggle header -->
+        <button
+          class="flex justify-between items-center w-full md:cursor-default"
+          @click="toggleConfigMobile"
+          :aria-expanded="showConfigOnMobile"
+          aria-controls="config-body"
+        >
+          <h2 id="config-heading" class="section-header">
+            <svg class="w-5 h-5 icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.324.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 0 1 1.37.49l1.296 2.247a1.125 1.125 0 0 1-.26 1.43l-1.003.828c-.293.241-.438.613-.43.992a7.723 7.723 0 0 1 0 .255c-.008.378.137.75.43.991l1.004.827c.424.35.534.954.26 1.43l-1.298 2.247a1.125 1.125 0 0 1-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.47 6.47 0 0 1-.22.128c-.331.183-.581.495-.644.869l-.213 1.281c-.09.543-.56.94-1.11.94h-2.594c-.55 0-1.019-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 0 1-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 0 1-1.369-.49l-1.297-2.247a1.125 1.125 0 0 1 .26-1.43l1.004-.827c.292-.24.437-.613.43-.991a6.932 6.932 0 0 1 0-.255c.007-.38-.138-.751-.43-.992l-1.004-.827a1.125 1.125 0 0 1-.26-1.43l1.297-2.247a1.125 1.125 0 0 1 1.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.086.22-.128.332-.183.582-.495.644-.869l.214-1.28Z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"/></svg>
+            Paramètres
           </h2>
-          <!-- Collapse/Expand arrow & badge: only visible on mobile -->
-          <div class="flex items-center gap-2 md:hidden">
-            <span class="text-[10px] uppercase tracking-wider font-extrabold text-slate-400 bg-slate-800/80 px-2 py-0.5 rounded border border-slate-700">
-              {{ showConfigOnMobile ? 'Masquer' : 'Modifier' }}
-            </span>
-            <button class="text-slate-400 focus:outline-none p-1" aria-label="Toggle Configuration">
-              <svg v-if="showConfigOnMobile" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-5 h-5">
-                <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 15.75 7.5-7.5 7.5 7.5" />
-              </svg>
-              <svg v-else xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-5 h-5">
-                <path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
-              </svg>
-            </button>
-          </div>
-        </div>
+          <svg class="w-5 h-5 text-[var(--text-secondary)] md:hidden transition-transform" :class="showConfigOnMobile ? 'rotate-180' : ''" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5"/></svg>
+        </button>
 
-        <div :class="['transition-all duration-300 md:block space-y-5', showConfigOnMobile ? 'block opacity-100' : 'hidden']">
-          <!-- Max Musics per Player -->
-          <div>
-            <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Musiques par joueur</label>
-            <div class="bg-slate-950/60 p-1.5 rounded-2xl border border-slate-800/80 flex gap-1.5 shadow-inner">
-              <button 
-                v-for="val in [1, 2, 3, 4, 5]" 
-                :key="val" 
-                @click="isHost && (config.maxMusicsPerPlayer = val) && saveConfig()"
+        <div id="config-body" :class="['mt-5 space-y-5 transition-all duration-300', showConfigOnMobile ? 'block' : 'hidden md:block']">
+          <!-- Musiques par joueur -->
+          <fieldset>
+            <legend class="form-label">Musiques par joueur</legend>
+            <div class="seg-control">
+              <button v-for="val in [1,2,3,4,5]" :key="val" type="button"
+                @click="isHost && (config.maxMusicsPerPlayer=val) && saveConfig()"
                 :disabled="!isHost"
-                type="button"
-                :class="['flex-1 py-2 rounded-xl text-xs font-extrabold transition-all duration-200 active:scale-95 disabled:opacity-60 disabled:cursor-not-allowed', config.maxMusicsPerPlayer === val ? 'bg-cyan-500 text-slate-950 shadow-md font-black' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-900/30']"
-              >
-                {{ val }}
-              </button>
+                :class="['seg-btn', config.maxMusicsPerPlayer===val ? 'active-accent' : '']"
+                :aria-pressed="config.maxMusicsPerPlayer===val"
+              >{{ val }}</button>
+            </div>
+          </fieldset>
+
+          <!-- Durée sélection -->
+          <fieldset>
+            <legend class="form-label">Durée de sélection</legend>
+            <div class="seg-control flex-wrap">
+              <button v-for="opt in [{v:30,l:'30s'},{v:60,l:'1m'},{v:120,l:'2m'},{v:180,l:'3m'},{v:300,l:'5m'}]" :key="opt.v" type="button"
+                @click="isHost && (config.selectionDuration=opt.v) && saveConfig()"
+                :disabled="!isHost"
+                :class="['seg-btn', config.selectionDuration===opt.v ? 'active-accent' : '']"
+                :aria-pressed="config.selectionDuration===opt.v"
+              >{{ opt.l }}</button>
+            </div>
+          </fieldset>
+
+          <!-- Durée extrait -->
+          <fieldset>
+            <legend class="form-label">Durée d'extrait</legend>
+            <div class="seg-control">
+              <button v-for="val in [10,15,20,30]" :key="val" type="button"
+                @click="isHost && (config.extractDuration=val) && saveConfig()"
+                :disabled="!isHost"
+                :class="['seg-btn', config.extractDuration===val ? 'active-accent' : '']"
+                :aria-pressed="config.extractDuration===val"
+              >{{ val }}s</button>
+            </div>
+          </fieldset>
+
+          <!-- Temps de vote -->
+          <fieldset>
+            <legend class="form-label">Temps de vote</legend>
+            <div class="seg-control flex-wrap">
+              <button v-for="val in [20,30,40,50,60]" :key="val" type="button"
+                @click="isHost && (config.votingDuration=val) && saveConfig()"
+                :disabled="!isHost"
+                :class="['seg-btn', config.votingDuration===val ? 'active-accent' : '']"
+                :aria-pressed="config.votingDuration===val"
+              >{{ val }}s</button>
+            </div>
+          </fieldset>
+
+          <!-- Toggles -->
+          <div class="divide-y" style="divide-color:var(--border)">
+            <div v-for="toggle in toggleOptions" :key="toggle.key" class="flex items-center justify-between py-3">
+              <label :for="`toggle-${toggle.key}`" class="text-sm text-[var(--text-secondary)] font-semibold pr-4 cursor-pointer">
+                {{ toggle.label }}
+              </label>
+              <label class="switch-container">
+                <input :id="`toggle-${toggle.key}`" type="checkbox" v-model="config[toggle.key]" :disabled="!isHost" @change="saveConfig" class="switch-input" />
+                <span class="switch-track"><span class="switch-thumb"></span></span>
+              </label>
             </div>
           </div>
 
-          <!-- Selection Duration -->
-          <div>
-            <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Durée de sélection</label>
-            <div class="bg-slate-950/60 p-1.5 rounded-2xl border border-slate-800/80 flex gap-1.5 shadow-inner flex-wrap">
-              <button 
-                v-for="opt in [{ v: 30, l: '30s' }, { v: 60, l: '1m' }, { v: 120, l: '2m' }, { v: 180, l: '3m' }, { v: 300, l: '5m' }]" 
-                :key="opt.v" 
-                @click="isHost && (config.selectionDuration = opt.v) && saveConfig()"
+          <!-- Limite joueurs -->
+          <fieldset>
+            <legend class="form-label">Limite de joueurs</legend>
+            <div class="seg-control">
+              <button v-for="val in [4,8,12,16]" :key="val" type="button"
+                @click="isHost && (config.maxPlayers=val) && saveConfig()"
                 :disabled="!isHost"
-                type="button"
-                :class="['flex-1 min-w-[45px] py-2 rounded-xl text-xs font-extrabold transition-all duration-200 active:scale-95 disabled:opacity-60 disabled:cursor-not-allowed', config.selectionDuration === opt.v ? 'bg-cyan-500 text-slate-950 shadow-md font-black' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-900/30']"
-              >
-                {{ opt.l }}
-              </button>
+                :class="['seg-btn', config.maxPlayers===val ? 'active-accent' : '']"
+                :aria-pressed="config.maxPlayers===val"
+              >{{ val }}</button>
             </div>
-          </div>
+          </fieldset>
 
-          <!-- Extract Duration -->
-          <div>
-            <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Durée d'extrait</label>
-            <div class="bg-slate-950/60 p-1.5 rounded-2xl border border-slate-800/80 flex gap-1.5 shadow-inner">
-              <button 
-                v-for="val in [10, 15, 20, 30]" 
-                :key="val" 
-                @click="isHost && (config.extractDuration = val) && saveConfig()"
-                :disabled="!isHost"
-                type="button"
-                :class="['flex-1 py-2 rounded-xl text-xs font-extrabold transition-all duration-200 active:scale-95 disabled:opacity-60 disabled:cursor-not-allowed', config.extractDuration === val ? 'bg-cyan-500 text-slate-950 shadow-md font-black' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-900/30']"
-              >
-                {{ val }}s
-              </button>
-            </div>
-          </div>
-
-          <!-- Voting Duration -->
-          <div>
-            <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Temps de vote</label>
-            <div class="bg-slate-950/60 p-1.5 rounded-2xl border border-slate-800/80 flex gap-1.5 shadow-inner flex-wrap">
-              <button 
-                v-for="val in [20, 30, 40, 50, 60]" 
-                :key="val" 
-                @click="isHost && (config.votingDuration = val) && saveConfig()"
-                :disabled="!isHost"
-                type="button"
-                :class="['flex-1 min-w-[35px] py-2 rounded-xl text-xs font-extrabold transition-all duration-200 active:scale-95 disabled:opacity-60 disabled:cursor-not-allowed', config.votingDuration === val ? 'bg-cyan-500 text-slate-950 shadow-md font-black' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-900/30']"
-              >
-                {{ val }}s
-              </button>
-            </div>
-          </div>
-
-          <!-- Show Answers -->
-          <div class="flex items-center justify-between py-2 border-y border-slate-800/80">
-            <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider pr-4">Révéler les réponses</span>
-            <label class="switch-container">
-              <input 
-                type="checkbox" 
-                v-model="config.showAnswers" 
-                :disabled="!isHost" 
-                @change="saveConfig" 
-                class="switch-input" 
-              />
-              <span class="switch-track">
-                <span class="switch-thumb"></span>
-              </span>
-            </label>
-          </div>
-
-          <!-- Auto Advance -->
-          <div class="flex items-center justify-between py-2 border-b border-slate-800/80">
-            <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider pr-4">Enchaîner les manches</span>
-            <label class="switch-container">
-              <input 
-                type="checkbox" 
-                v-model="config.autoAdvance" 
-                :disabled="!isHost" 
-                @change="saveConfig" 
-                class="switch-input" 
-              />
-              <span class="switch-track">
-                <span class="switch-thumb"></span>
-              </span>
-            </label>
-          </div>
-
-          <!-- Show Vote Count -->
-          <div class="flex items-center justify-between py-2 border-b border-slate-800/80">
-            <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider pr-4">Afficher le nombre de votes</span>
-            <label class="switch-container">
-              <input 
-                type="checkbox" 
-                v-model="config.showVoteCount" 
-                :disabled="!isHost" 
-                @change="saveConfig" 
-                class="switch-input" 
-              />
-              <span class="switch-track">
-                <span class="switch-thumb"></span>
-              </span>
-            </label>
-          </div>
-
-          <!-- Enable Blind Test -->
-          <div class="flex items-center justify-between py-2 border-b border-slate-800/80">
-            <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider pr-4">Blind Test QCM (+1 pt)</span>
-            <label class="switch-container">
-              <input 
-                type="checkbox" 
-                v-model="config.enableBlindTest" 
-                :disabled="!isHost" 
-                @change="saveConfig" 
-                class="switch-input" 
-              />
-              <span class="switch-track">
-                <span class="switch-thumb"></span>
-              </span>
-            </label>
-          </div>
-
-          <!-- Max Players -->
-          <div>
-            <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Limite de joueurs</label>
-            <div class="bg-slate-950/60 p-1.5 rounded-2xl border border-slate-800/80 flex gap-1.5 shadow-inner">
-              <button 
-                v-for="val in [4, 8, 12, 16]" 
-                :key="val" 
-                @click="isHost && (config.maxPlayers = val) && saveConfig()"
-                :disabled="!isHost"
-                type="button"
-                :class="['flex-1 py-2 rounded-xl text-xs font-extrabold transition-all duration-200 active:scale-95 disabled:opacity-60 disabled:cursor-not-allowed', config.maxPlayers === val ? 'bg-cyan-500 text-slate-950 shadow-md font-black' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-900/30']"
-              >
-                {{ val }}
-              </button>
-            </div>
-          </div>
-          
-          <p v-if="!isHost" class="text-center text-xs text-slate-500 mt-4 italic">
+          <p v-if="!isHost" class="text-center text-xs text-[var(--text-muted)] italic pt-1">
             Seul l'hôte peut modifier ces règles.
           </p>
         </div>
       </section>
 
-      <!-- Right Column: Players List -->
-      <section class="glass-panel p-6 rounded-2xl md:col-span-2 border border-slate-800 flex flex-col justify-between min-h-[450px]">
-        <div>
-          <div class="flex justify-between items-center mb-6 border-b border-slate-800 pb-3">
-            <h2 class="text-xl font-bold text-white flex items-center gap-2">
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5 text-purple-400">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337 9.337 0 0 0 4.121-.952 4.125 4.125 0 0 0-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.109A3.318 3.318 0 0 1 11.682 22H8.318A3.318 3.318 0 0 1 5 19.237v-.109c0-1.113.285-2.16.786-3.07M15 19.128v-.109a3.318 3.318 0 0 0-3.318-3.318H8.318a3.318 3.318 0 0 0-3.318 3.318v.109M15 19.128v.109c0 .248-.027.493-.08.73M5 19.128v.109c.053.237.08.482.08.73m0 0A3.318 3.318 0 0 1 8.318 22h3.364a3.318 3.318 0 0 0 3.238-2.673M5 19.128v-.109c0-.218.02-.435.06-.645m10.28 0a3.3 3.3 0 0 0-.06-.645M19.5 8.25a3 3 0 1 1-6 0 3 3 0 0 1 6 0ZM6.75 6a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Zm13.5 9a2.25 2.25 0 0 0-4.5 0 2.25 2.25 0 0 0 4.5 0Z" />
-              </svg>
-              Joueurs connectés
-            </h2>
-            <span class="text-xs bg-slate-900 px-3 py-1 rounded-full text-slate-400 font-bold border border-slate-800">
-              {{ store.players.length }} / {{ store.session?.max_players || 8 }}
-            </span>
-          </div>
-
-          <!-- Players List with TransitionGroup -->
-          <TransitionGroup
-            name="list"
-            tag="div"
-            class="space-y-2"
-          >
-            <div v-for="player in store.players" :key="player.id" :class="['py-3.5 flex items-center justify-between border-b border-slate-800/50 last:border-0 hover:bg-slate-900/10 transition-all duration-300 px-2 rounded-xl', !player.is_connected ? 'opacity-40' : '']">
-              <div class="flex items-center gap-3 min-w-0">
-                <!-- Status circle indicator -->
-                <span :class="['w-2.5 h-2.5 rounded-full flex-shrink-0', player.is_connected ? 'bg-emerald-500 animate-pulse' : 'bg-rose-500']"></span>
-                <img v-if="player.avatar_seed" :src="`https://api.dicebear.com/9.x/notionists-neutral/svg?seed=${player.avatar_seed}&backgroundColor=06b6d4,9333ea,f59e0b,f43f5e,10b981,3b82f6,6366f1`" class="w-8 h-8 rounded-full border border-slate-700/50 bg-slate-800/80" alt="Avatar" />
-                <span class="font-bold text-white truncate">{{ player.name }}</span>
-                <button v-if="player.id === store.player?.id" @click.stop="regenerateAvatar(player.id)" title="Générer un nouvel avatar" class="p-1.5 ml-0.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white active:scale-95 transition-all">
-                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-3.5 h-3.5">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99" />
-                  </svg>
-                </button>
-                <span v-if="player.is_bot" class="text-[10px] bg-cyan-500/20 text-cyan-400 border border-cyan-500/30 font-extrabold px-1.5 py-0.5 rounded uppercase tracking-wider flex-shrink-0">Bot</span>
-                <span v-if="player.name === store.session?.host_name" class="text-[10px] bg-yellow-500/20 text-yellow-400 border border-yellow-500/30 font-extrabold px-1.5 py-0.5 rounded uppercase tracking-wider flex-shrink-0">Hôte</span>
-              </div>
-              <div class="flex items-center gap-3">
-                <div class="text-xs font-semibold text-slate-500">
-                  <span v-if="!player.is_connected">Déconnecté</span>
-                  <span v-else class="text-emerald-400">Prêt</span>
-                </div>
-                <!-- Host Actions -->
-                <div v-if="isHost && player.id !== store.player?.id" class="flex gap-1.5 border-l border-slate-800 pl-3">
-                  <!-- Promote to Host -->
-                  <button v-if="!player.is_bot" @click="promotePlayer(player.id)" title="Promouvoir Hôte" class="p-1 rounded bg-yellow-500/10 hover:bg-yellow-500/20 border border-yellow-500/20 text-yellow-400 transition-all">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-3.5 h-3.5">
-                      <path stroke-linecap="round" stroke-linejoin="round" d="M15 11.25l-3-3m0 0l-3 3m3-3v11.25M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                  </button>
-                  <!-- Kick Player -->
-                  <button @click="kickPlayer(player.id)" title="Kick du salon" class="p-1 rounded bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/20 text-rose-400 transition-all">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-3.5 h-3.5">
-                      <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                  </button>
-                </div>
-              </div>
-            </div>
-          </TransitionGroup>
+      <!-- Players List -->
+      <section class="glass-panel p-5 rounded-2xl md:col-span-2 border border-[var(--border-strong)] flex flex-col" aria-labelledby="players-heading">
+        <div class="flex justify-between items-center mb-5 pb-4 border-b border-[var(--border)]">
+          <h2 id="players-heading" class="section-header">
+            <svg class="w-5 h-5 icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M18 18.72a9.094 9.094 0 0 0 3.741-.479 3 3 0 0 0-4.682-2.72m.94 3.198.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0 1 12 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 0 1 6 18.719m12 0a5.971 5.971 0 0 0-.941-3.197m0 0A5.995 5.995 0 0 0 12 12.75a5.995 5.995 0 0 0-5.058 2.772m0 0a3 3 0 0 0-4.681 2.72 8.986 8.986 0 0 0 3.74.477m.94-3.197a5.971 5.971 0 0 0-.94 3.197M15 6.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Zm6 3a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Zm-13.5 0a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Z"/></svg>
+            Joueurs connectés
+          </h2>
+          <span class="badge badge-muted" aria-label="`${store.players.length} joueurs sur ${store.session?.max_players || 8}`">
+            {{ store.players.length }} / {{ store.session?.max_players || 8 }}
+          </span>
         </div>
 
-        <!-- Action Area -->
-        <div class="mt-8 border-t border-slate-800 pt-6 flex flex-col sm:flex-row gap-4">
-          <!-- Host Controls -->
-          <div v-if="isHost" class="flex flex-col sm:flex-row gap-4 w-full">
-            <button @click="addBot" class="flex-1 bg-slate-800 hover:bg-slate-700 text-white font-bold py-3 rounded-xl border border-slate-700 transition-all flex items-center justify-center gap-2">
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5 text-cyan-400">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v6m3-3H9m12 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
-              </svg>
+        <TransitionGroup name="list" tag="div" class="flex-1 min-h-[200px]" aria-live="polite">
+          <div v-for="player in store.players" :key="player.id"
+            class="player-row" :class="{ 'opacity-40': !player.is_connected }">
+            <div class="flex items-center gap-3 min-w-0">
+              <span :class="['status-dot', player.is_connected ? 'online animate-pulse' : 'offline']"
+                :aria-label="player.is_connected ? 'Connecté' : 'Déconnecté'"></span>
+              <img v-if="player.avatar_seed"
+                :src="`https://api.dicebear.com/9.x/notionists-neutral/svg?seed=${player.avatar_seed}&backgroundColor=6366f1,8b5cf6,06b6d4,f43f5e,10b981`"
+                class="player-avatar" :alt="`Avatar de ${player.name}`" loading="lazy" />
+              <span class="font-bold text-white truncate text-sm">{{ player.name }}</span>
+              <button v-if="player.id === store.player?.id" @click.stop="regenerateAvatar(player.id)"
+                class="btn btn-ghost btn-icon" style="width:32px;height:32px;border-radius:var(--r-sm)" title="Générer un nouvel avatar" aria-label="Générer un nouvel avatar">
+                <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99"/></svg>
+              </button>
+              <span v-if="player.is_bot" class="badge badge-bot">Bot</span>
+              <span v-if="player.name === store.session?.host_name" class="badge badge-host">Hôte</span>
+            </div>
+            <div class="flex items-center gap-2 flex-shrink-0">
+              <span class="text-xs font-semibold" :class="player.is_connected ? 'text-emerald-400' : 'text-[var(--text-muted)]'">
+                {{ player.is_connected ? 'Prêt' : 'Déconnecté' }}
+              </span>
+              <div v-if="isHost && player.id !== store.player?.id" class="flex gap-1.5 pl-3 border-l border-[var(--border)]">
+                <button v-if="!player.is_bot" @click="promotePlayer(player.id)" title="Promouvoir Hôte"
+                  aria-label="`Promouvoir ${player.name} comme hôte`"
+                  class="btn btn-icon touch-target" style="width:36px;height:36px;background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.25);color:#fcd34d;border-radius:var(--r-sm)">
+                  <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M15 11.25l-3-3m0 0l-3 3m3-3v11.25M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                </button>
+                <button @click="kickPlayer(player.id)" title="Exclure du salon"
+                  :aria-label="`Exclure ${player.name} du salon`"
+                  class="btn btn-icon touch-target" style="width:36px;height:36px;background:var(--clr-danger-dim);border:1px solid rgba(244,63,94,.25);color:#fda4af;border-radius:var(--r-sm)">
+                  <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12"/></svg>
+                </button>
+              </div>
+            </div>
+          </div>
+        </TransitionGroup>
+
+        <!-- Desktop CTAs -->
+        <div class="mt-6 pt-5 border-t border-[var(--border)] hidden md:flex flex-col sm:flex-row gap-3">
+          <template v-if="isHost">
+            <button @click="addBot" class="btn btn-ghost flex-1">
+              <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v6m3-3H9m12 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/></svg>
               Ajouter un Bot
             </button>
-            <button @click="startSelection" class="flex-1 glow-btn bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold py-3 rounded-xl transition-all flex items-center justify-center gap-2">
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.347a1.125 1.125 0 0 1 0 1.972l-11.54 6.347a1.125 1.125 0 0 1-1.667-.986V5.653Z" />
-              </svg>
+            <button @click="startSelection" class="btn btn-primary flex-1">
+              <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.347a1.125 1.125 0 0 1 0 1.972l-11.54 6.347a1.125 1.125 0 0 1-1.667-.986V5.653Z"/></svg>
               Lancer la Sélection
             </button>
-          </div>
-
-          <!-- Non-Host Status Message -->
-          <div v-else class="w-full text-center bg-slate-900/40 border border-slate-800 p-4 rounded-xl text-slate-400 italic text-sm">
-            En attente du lancement par l'hôte ({{ store.session?.host_name }})...
+          </template>
+          <div v-else class="w-full text-center py-3 px-4 rounded-xl text-sm text-[var(--text-secondary)] italic" style="background:var(--surface-raised);border:1px solid var(--border)">
+            En attente de l'hôte <strong class="text-white not-italic">{{ store.session?.host_name }}</strong>…
           </div>
         </div>
       </section>
     </div>
 
-    <!-- Sticky Host Actions (Floating Bottom Bar on mobile) -->
-    <div v-if="isHost" class="fixed bottom-0 left-0 right-0 z-40 md:hidden bg-slate-950/85 backdrop-blur-md border-t border-slate-800/80 p-4 pb-safe flex gap-3 shadow-[0_-8px_30px_rgba(0,0,0,0.6)] animate-fade-in-up">
-      <button @click="addBot" class="flex-1 bg-slate-900 hover:bg-slate-800 text-white font-bold py-3.5 rounded-xl border border-slate-800/80 transition-all flex items-center justify-center gap-1.5 text-xs active:scale-95">
+    <!-- Mobile sticky bottom bar (host only) -->
+    <div v-if="isHost" class="bottom-bar md:hidden animate-fade-in-up opacity-0" style="animation-delay:.3s">
+      <button @click="addBot" class="btn btn-ghost flex-1 text-sm">
         🤖 + Bot
       </button>
-      <button @click="startSelection" class="glow-btn bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-black py-3.5 rounded-xl transition-all flex items-center justify-center gap-1.5 text-xs active:scale-95 flex-[1.75_1.75_0%]">
-        🚀 Sélection
+      <button @click="startSelection" class="btn btn-primary flex-[2] text-sm font-black">
+        🚀 Lancer la Sélection
       </button>
     </div>
   </div>
@@ -345,36 +251,35 @@ import { ref, computed, onMounted, onUnmounted, reactive, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useGameStore } from '../stores/gameStore';
 
-const route = useRoute();
+const route  = useRoute();
 const router = useRouter();
-const store = useGameStore();
+const store  = useGameStore();
 
-const directPseudo = ref('');
-const errorMsg = ref(null);
-const isLoading = ref(true);
-
+const directPseudo      = ref('');
+const errorMsg          = ref(null);
+const isLoading         = ref(true);
 const showConfigOnMobile = ref(false);
+const copied            = ref(false);
+
+const toggleOptions = [
+  { key: 'showAnswers',     label: 'Révéler les réponses' },
+  { key: 'autoAdvance',     label: 'Enchaîner les manches' },
+  { key: 'showVoteCount',   label: 'Afficher le nombre de votes' },
+  { key: 'enableBlindTest', label: 'Blind Test QCM (+1 pt)' },
+];
+
 const toggleConfigMobile = () => {
-  if (typeof window !== 'undefined' && window.innerWidth < 768) {
-    showConfigOnMobile.value = !showConfigOnMobile.value;
-  }
+  if (window.innerWidth < 768) showConfigOnMobile.value = !showConfigOnMobile.value;
 };
 
-const copied = ref(false);
 const copyCode = async () => {
   try {
-    const inviteLink = `${window.location.origin}/game/${route.params.code}`;
-    await navigator.clipboard.writeText(inviteLink);
+    await navigator.clipboard.writeText(`${window.location.origin}/game/${route.params.code}`);
     copied.value = true;
-    setTimeout(() => {
-      copied.value = false;
-    }, 2000);
-  } catch (err) {
-    console.error("Failed to copy link:", err);
-  }
+    setTimeout(() => { copied.value = false; }, 2000);
+  } catch {}
 };
 
-// Form configuration state reactively mapped to session config
 const config = reactive({
   maxMusicsPerPlayer: 2,
   selectionDuration: 120,
@@ -384,32 +289,34 @@ const config = reactive({
   maxPlayers: 8,
   autoAdvance: false,
   showVoteCount: true,
-  enableBlindTest: false
+  enableBlindTest: false,
 });
 
-const isHost = computed(() => {
-  return store.player && store.session && store.player.name === store.session.host_name;
-});
+const isHost = computed(() =>
+  store.player && store.session && store.player.name === store.session.host_name
+);
+
+const syncConfig = (s) => {
+  if (!s) return;
+  config.maxMusicsPerPlayer = s.max_musics_per_player;
+  config.selectionDuration  = s.selection_duration;
+  config.extractDuration    = s.extract_duration;
+  config.votingDuration     = s.voting_duration;
+  config.showAnswers        = s.show_answers;
+  config.maxPlayers         = s.max_players;
+  config.autoAdvance        = s.auto_advance;
+  config.showVoteCount      = s.show_vote_count;
+  config.enableBlindTest    = s.enable_blind_test;
+};
 
 const loadAndSyncConfig = async () => {
   await store.loadSession(route.params.code);
-  if (store.session) {
-    config.maxMusicsPerPlayer = store.session.max_musics_per_player;
-    config.selectionDuration = store.session.selection_duration;
-    config.extractDuration = store.session.extract_duration;
-    config.votingDuration = store.session.voting_duration;
-    config.showAnswers = store.session.show_answers;
-    config.maxPlayers = store.session.max_players;
-    config.autoAdvance = store.session.auto_advance;
-    config.showVoteCount = store.session.show_vote_count;
-    config.enableBlindTest = store.session.enable_blind_test;
-  }
+  syncConfig(store.session);
 };
 
 const handleKeyDown = (e) => {
   if (e.code === 'Space' && isHost.value) {
-    const isTyping = ['INPUT', 'TEXTAREA'].includes(document.activeElement?.tagName);
-    if (!isTyping) {
+    if (!['INPUT','TEXTAREA'].includes(document.activeElement?.tagName)) {
       e.preventDefault();
       startSelection();
     }
@@ -424,38 +331,20 @@ onMounted(async () => {
     }
     window.addEventListener('keydown', handleKeyDown);
   } catch (err) {
-    console.error("Failed to load waiting room session:", err);
+    console.error('Failed to load waiting room:', err);
   } finally {
     isLoading.value = false;
   }
 });
 
-onUnmounted(() => {
-  window.removeEventListener('keydown', handleKeyDown);
-});
+onUnmounted(() => window.removeEventListener('keydown', handleKeyDown));
 
-// Watch for changes in session from socket to keep config updated for non-hosts
-watch(() => store.session, (newSession) => {
-  if (newSession) {
-    config.maxMusicsPerPlayer = newSession.max_musics_per_player;
-    config.selectionDuration = newSession.selection_duration;
-    config.extractDuration = newSession.extract_duration;
-    config.votingDuration = newSession.voting_duration;
-    config.showAnswers = newSession.show_answers;
-    config.maxPlayers = newSession.max_players;
-    config.autoAdvance = newSession.auto_advance;
-    config.showVoteCount = newSession.show_vote_count;
-    config.enableBlindTest = newSession.enable_blind_test;
-    
-    // Redirect if phase is already started
-    if (newSession.phase === 'selection') {
-      router.push(`/game/${route.params.code}/selection`);
-    } else if (newSession.phase === 'voting') {
-      router.push(`/game/${route.params.code}/voting`);
-    } else if (newSession.phase === 'results') {
-      router.push(`/game/${route.params.code}/results`);
-    }
-  }
+watch(() => store.session, (s) => {
+  if (!s) return;
+  syncConfig(s);
+  if (s.phase === 'selection') router.push(`/game/${route.params.code}/selection`);
+  else if (s.phase === 'voting') router.push(`/game/${route.params.code}/voting`);
+  else if (s.phase === 'results') router.push(`/game/${route.params.code}/results`);
 }, { deep: true });
 
 const joinDirectly = async () => {
@@ -466,74 +355,20 @@ const joinDirectly = async () => {
     store.connectSocket(code);
     await loadAndSyncConfig();
   } catch (err) {
-    errorMsg.value = err.response?.data?.message || err.message || "Erreur de connexion";
+    errorMsg.value = err.response?.data?.message || err.message || 'Erreur de connexion';
   }
 };
 
 const saveConfig = async () => {
   if (!isHost.value) return;
   try {
-    await store.updateConfig({
-      maxMusicsPerPlayer: config.maxMusicsPerPlayer,
-      selectionDuration: config.selectionDuration,
-      extractDuration: config.extractDuration,
-      votingDuration: config.votingDuration,
-      showAnswers: config.showAnswers,
-      maxPlayers: config.maxPlayers,
-      autoAdvance: config.autoAdvance,
-      showVoteCount: config.showVoteCount,
-      enableBlindTest: config.enableBlindTest
-    });
-  } catch (err) {
-    console.error("Failed to update config:", err);
-  }
+    await store.updateConfig({ ...config, maxMusicsPerPlayer: config.maxMusicsPerPlayer });
+  } catch (err) { console.error('Failed to update config:', err); }
 };
 
-const addBot = async () => {
-  if (!isHost.value) return;
-  try {
-    await store.addBot();
-  } catch (err) {
-    console.error("Failed to add bot:", err);
-  }
-};
-
-const startSelection = async () => {
-  if (!isHost.value) return;
-  try {
-    await store.startSelection();
-  } catch (err) {
-    console.error("Failed to start selection:", err);
-  }
-};
-
-const promotePlayer = async (targetId) => {
-  if (!isHost.value) return;
-  if (confirm("Voulez-vous vraiment désigner ce joueur comme Hôte ? Vous perdrez vos droits d'administration.")) {
-    try {
-      await store.promotePlayer(targetId);
-    } catch (err) {
-      console.error("Failed to promote player:", err);
-    }
-  }
-};
-
-const kickPlayer = async (targetId) => {
-  if (!isHost.value) return;
-  if (confirm("Voulez-vous vraiment exclure ce joueur de la partie ?")) {
-    try {
-      await store.kickPlayer(targetId);
-    } catch (err) {
-      console.error("Failed to kick player:", err);
-    }
-  }
-};
-
-const regenerateAvatar = async (playerId) => {
-  try {
-    await store.regenerateAvatar(playerId);
-  } catch (err) {
-    console.error("Failed to regenerate avatar:", err);
-  }
-};
+const addBot          = async () => { if (isHost.value) try { await store.addBot(); } catch {} };
+const startSelection  = async () => { if (isHost.value) try { await store.startSelection(); } catch {} };
+const promotePlayer   = async (id) => { if (confirm("Désigner ce joueur comme Hôte ? Vous perdrez vos droits.")) try { await store.promotePlayer(id); } catch {} };
+const kickPlayer      = async (id) => { if (confirm("Exclure ce joueur du salon ?")) try { await store.kickPlayer(id); } catch {} };
+const regenerateAvatar = async (id) => { try { await store.regenerateAvatar(id); } catch {} };
 </script>
