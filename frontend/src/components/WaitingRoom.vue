@@ -216,14 +216,17 @@
             <div class="flex items-center gap-3 min-w-0">
               <span :class="['status-dot', player.is_connected ? 'online animate-pulse' : 'offline']"
                 :aria-label="player.is_connected ? 'Connecté' : 'Déconnecté'"></span>
-              <img v-if="player.avatar_seed"
-                :src="`https://api.dicebear.com/9.x/notionists-neutral/svg?seed=${player.avatar_seed}&backgroundColor=6366f1,8b5cf6,06b6d4,f43f5e,10b981`"
-                class="player-avatar" :alt="`Avatar de ${player.name}`" loading="lazy" />
+              <div v-if="player.avatar_seed" class="relative group flex-shrink-0" style="width: 36px; height: 36px;">
+                <img
+                  :src="`https://api.dicebear.com/9.x/notionists-neutral/svg?seed=${player.avatar_seed}&backgroundColor=6366f1,8b5cf6,06b6d4,f43f5e,10b981`"
+                  class="player-avatar w-full h-full" :alt="`Avatar de ${player.name}`" loading="lazy" />
+                <button v-if="player.id === store.player?.id" @click.stop="regenerateAvatar(player.id)"
+                  class="absolute inset-0 flex items-center justify-center bg-slate-950/75 rounded-full opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-all duration-200 border-0 p-0 text-white cursor-pointer"
+                  title="Générer un nouvel avatar" aria-label="Générer un nouvel avatar">
+                  <i class="fa-solid fa-arrows-rotate text-[11px] hover:rotate-180 transition-transform duration-300"></i>
+                </button>
+              </div>
               <span class="font-bold text-white truncate text-sm">{{ player.name }}</span>
-              <button v-if="player.id === store.player?.id" @click.stop="regenerateAvatar(player.id)"
-                class="btn btn-ghost btn-icon" style="width:32px;height:32px;border-radius:var(--r-sm)" title="Générer un nouvel avatar" aria-label="Générer un nouvel avatar">
-                <i class="fa-solid fa-arrows-rotate text-[13px]"></i>
-              </button>
               <span v-if="player.is_bot" class="badge badge-bot">Bot</span>
               <span v-if="player.name === store.session?.host_name" class="badge badge-host">Hôte</span>
             </div>
