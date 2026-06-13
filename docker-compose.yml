@@ -22,7 +22,8 @@ services:
     networks:
       - internal-network
 
-  backend:
+  cekikilami-backend:
+    container_name: cekikilami-backend
     build:
       context: ./backend
     environment:
@@ -41,14 +42,15 @@ services:
       - proxy
     restart: on-failure # Redémarre automatiquement en cas de crash imprévu
 
-  frontend:
+  cekikilami-frontend:
+    container_name: cekikilami-frontend
     build:
       context: ./frontend
       args:
         VITE_API_URL: https://cekikilami.lucasspitzer.fr/api
         VITE_SOCKET_URL: https://cekikilami.lucasspitzer.fr
     depends_on:
-      - backend
+      - cekikilami-backend
     networks:
       - internal-network
       - proxy
