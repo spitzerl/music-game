@@ -8,9 +8,6 @@ services:
       POSTGRES_HOST_AUTH_METHOD: trust
     volumes:
       - postgres_data:/var/lib/postgresql/data
-    networks:
-      - internal-network
-    # Test pour vérifier que Postgres est pleinement opérationnel
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres -d music_game"]
       interval: 3s
@@ -19,8 +16,6 @@ services:
 
   redis:
     image: redis:7-alpine
-    networks:
-      - internal-network
 
   cekikilami-backend:
     container_name: cekikilami-backend
@@ -34,13 +29,13 @@ services:
       CORS_ORIGIN: https://cekikilami.lucasspitzer.fr
     depends_on:
       postgres:
-        condition: service_healthy # Attend que le healthcheck de Postgres passe au vert
+        condition: service_healthy
       redis:
         condition: service_started
     networks:
-      - internal-network
+      - default
       - proxy
-    restart: on-failure # Redémarre automatiquement en cas de crash imprévu
+    restart: on-failure
 
   cekikilami-frontend:
     container_name: cekikilami-frontend
@@ -52,14 +47,12 @@ services:
     depends_on:
       - cekikilami-backend
     networks:
-      - internal-network
+      - default
       - proxy
 
 volumes:
   postgres_data:
 
 networks:
-  internal-network:
-    driver: bridge
   proxy:
     external: true

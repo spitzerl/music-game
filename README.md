@@ -6,7 +6,7 @@ Jeu musical multijoueur (Vue 3 + Node.js + Socket.IO + PostgreSQL + Redis).
 
 - `frontend`: client Vue 3 + Vite + Pinia + Socket.IO client
 - `backend`: API Express + Socket.IO + PostgreSQL + Redis
-- `docker-compose.yml`: stack complète (frontend, backend, postgres, redis, nginx)
+- `compose.yaml`: stack complète (frontend, backend, postgres, redis, nginx)
 
 ## Développement local
 
@@ -35,7 +35,7 @@ Application disponible sur `http://localhost:3000`.
 ## Production Docker
 
 ```bash
-docker-compose up --build
+docker compose up --build
 ```
 
 - Reverse proxy Nginx exposé sur `http://localhost`
@@ -57,4 +57,4 @@ docker-compose up --build
 - `VITE_API_URL=http://localhost:3001/api` (dev local)
 - `VITE_SOCKET_URL=http://localhost:3001` (dev local)
 
-En Docker, les variables sont injectées via `docker-compose.yml`.
+En Docker, les variables sont injectées via `compose.yaml`.
